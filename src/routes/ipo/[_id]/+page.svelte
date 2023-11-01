@@ -20,6 +20,7 @@
   import { set } from "lodash";
   import { token } from "../../../helper/token_store";
   import { goto } from "$app/navigation";
+  import {PUBLIC_API_URI} from "$env/static/public";
 
   let ipo = null;
   let loading = true;
@@ -63,7 +64,7 @@
     };
 
     const response = await fetch(
-      `http://192.168.79.183:3132/api/ipo/${$page.params._id}`,
+      `${PUBLIC_API_URI}/api/ipo/${$page.params._id}`,
       requestOptions
     );
 
@@ -78,7 +79,7 @@
       goto(`/login`, { replaceState: true });
     }
     const data = await fetchIPO();
-    ipo = data["ipo"];
+    ipo = data["data"]["ipo"];
     gmpKey = ipo["gmpKey"];
   });
 
@@ -106,7 +107,7 @@
     };
 
     const response = await fetch(
-      `http://192.168.79.183:3132/api/gmp/refresh/${ipo["_id"]}`,
+      `${PUBLIC_API_URI}/api/gmp/refresh/${ipo["_id"]}`,
       requestOptions
     );
 
@@ -134,7 +135,7 @@
     };
 
     const response = await fetch(
-      "http://192.168.79.183:3132/api/ipo",
+      `${PUBLIC_API_URI}/api/ipo`,
       requestOptions
     );
 

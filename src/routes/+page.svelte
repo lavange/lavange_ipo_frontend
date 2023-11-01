@@ -19,6 +19,7 @@
   import "@carbon/charts-svelte/styles.css";
   import { token } from "../helper/token_store";
   import { goto } from "$app/navigation";
+  import {PUBLIC_API_URI} from "$env/static/public";
 
   let ipos = null;
   let loading = true;
@@ -57,7 +58,7 @@
     };
 
     const response = await fetch(
-      "http://192.168.79.183:3132/api/ipo",
+      `${PUBLIC_API_URI}/api/ipo`,
       requestOptions
     );
 
@@ -73,7 +74,7 @@
     }
 
     const data = await fetchIPO();
-    ipos = data["ipos"] ?? [];
+    ipos = data["data"]["ipos"] ?? [];
     ipos.sort((a, b) => {
       if (
         a.hasOwnProperty("biddingStartDate") &&
