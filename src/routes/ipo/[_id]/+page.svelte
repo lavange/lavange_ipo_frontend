@@ -164,12 +164,6 @@
       <Button
         size="small"
         icon={Repeat}
-        iconDescription="Sync IPO"
-        disabled={syncStatus}>IPO</Button
-      >
-      <Button
-        size="small"
-        icon={Repeat}
         iconDescription="Sync GMP"
         disabled={syncStatus}
         on:click={async () => {

@@ -1,6 +1,7 @@
 <script>
   //@ts-nocheck
   import {
+  Button,
     ClickableTile,
     Column,
     Content,
@@ -20,10 +21,12 @@
   import { token } from "../helper/token_store";
   import { goto } from "$app/navigation";
   import {PUBLIC_API_URI} from "$env/static/public";
+  import { Repeat } from "carbon-icons-svelte";
 
   let ipos = null;
   let loading = true;
   let token_;
+  let syncStatus = false;
 
   token.subscribe((value) => {
     token_ = value;
@@ -123,6 +126,25 @@
       };
     });
   };
+
+  const syncIpo = async () => {
+    syncStatus = true;
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${token_}`);
+
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+    };
+
+    const response = await fetch(
+      `${PUBLIC_API_URI}/api/ipo/refresh`,
+      requestOptions
+    );
+
+    syncStatus = false;
+  };
 </script>
 
 <Content>
@@ -133,8 +155,20 @@
   {:else}
     <Grid padding fullWidth>
       <Row>
-        <Column>
+        <Column sm={14} md={2} lg={14}>
           <TextInput bind:value={search_query} placeholder="Enter ipo name" />
+        </Column>
+        <Column sm={14} md={2} lg={2}>
+          <Button
+          size="small"
+          icon={Repeat}
+          iconDescription="Sync IPO"
+          disabled={syncStatus}
+          on:click={async ()=>{
+            syncIpo();
+          }}
+          >IPO</Button
+        >
         </Column>
       </Row>
       <Row>
