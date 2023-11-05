@@ -17,6 +17,7 @@
   import { token } from "../../helper/token_store";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
+  import {PUBLIC_API_URI} from "$env/static/public";
 
   let token_;
   let username = "";
@@ -47,7 +48,7 @@
     };
 
     const response = await fetch(
-      "http://localhost:3132/api/login",
+      `${PUBLIC_API_URI}:3132/api/login`,
       requestOptions
     );
     const data = await response.json();
