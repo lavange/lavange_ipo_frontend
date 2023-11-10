@@ -48,7 +48,7 @@
     };
 
     const response = await fetch(
-      `${PUBLIC_API_URI}:3132/api/login`,
+      `${PUBLIC_API_URI}/api/login`,
       requestOptions
     );
     const data = await response.json();
