@@ -61,7 +61,7 @@
     };
 
     const response = await fetch(
-      `${PUBLIC_API_URI}/api/ipo`,
+      `${PUBLIC_API_URI}/ipo`,
       requestOptions
     );
 
@@ -139,7 +139,7 @@
     };
 
     const response = await fetch(
-      `${PUBLIC_API_URI}/api/ipo/refresh`,
+      `${PUBLIC_API_URI}/ipo/refresh`,
       requestOptions
     );
 

@@ -64,7 +64,7 @@
     };
 
     const response = await fetch(
-      `${PUBLIC_API_URI}/api/ipo/${$page.params._id}`,
+      `${PUBLIC_API_URI}/ipo/${$page.params._id}`,
       requestOptions
     );
 
@@ -107,7 +107,7 @@
     };
 
     const response = await fetch(
-      `${PUBLIC_API_URI}/api/gmp/refresh/${ipo["_id"]}`,
+      `${PUBLIC_API_URI}/gmp/refresh/${ipo["_id"]}`,
       requestOptions
     );
 
@@ -135,7 +135,7 @@
     };
 
     const response = await fetch(
-      `${PUBLIC_API_URI}/api/ipo`,
+      `${PUBLIC_API_URI}/ipo`,
       requestOptions
     );
 
