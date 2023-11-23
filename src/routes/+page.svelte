@@ -1,7 +1,7 @@
 <script>
   //@ts-nocheck
   import {
-  Button,
+    Button,
     ClickableTile,
     Column,
     Content,
@@ -9,6 +9,9 @@
     ImageLoader,
     Loading,
     Row,
+    Tab,
+    TabContent,
+    Tabs,
     TextInput,
     Tile,
     Truncate,
@@ -20,7 +23,7 @@
   import "@carbon/charts-svelte/styles.css";
   import { token } from "../helper/token_store";
   import { goto } from "$app/navigation";
-  import {PUBLIC_API_URI} from "$env/static/public";
+  import { PUBLIC_API_URI } from "$env/static/public";
   import { Repeat } from "carbon-icons-svelte";
 
   let ipos = null;
@@ -60,10 +63,7 @@
       redirect: "follow",
     };
 
-    const response = await fetch(
-      `${PUBLIC_API_URI}/ipo`,
-      requestOptions
-    );
+    const response = await fetch(`${PUBLIC_API_URI}/ipo`, requestOptions);
 
     const data = response.json();
     loading = false;
@@ -78,28 +78,47 @@
 
     const data = await fetchIPO();
     ipos = data["data"]["ipos"] ?? [];
-    ipos.sort((a, b) => {
-      if (
-        a.hasOwnProperty("biddingStartDate") &&
-        b.hasOwnProperty("biddingStartDate")
-      ) {
-        let keyA = new Date(a.biddingStartDate);
-        let keyB = new Date(b.biddingStartDate);
-        return keyB - keyA;
-      } else if (a.hasOwnProperty("biddingStartDate")) {
-        return -1;
-      } else if (b.hasOwnProperty("biddingStartDate")) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+    // ipos.sort((a, b) => {
+    //   if (
+    //     a.hasOwnProperty("biddingStartDate") &&
+    //     b.hasOwnProperty("biddingStartDate")
+    //   ) {
+    //     let keyA = new Date(a.biddingStartDate);
+    //     let keyB = new Date(b.biddingStartDate);
+    //     return keyB - keyA;
+    //   } else if (a.hasOwnProperty("biddingStartDate")) {
+    //     return -1;
+    //   } else if (b.hasOwnProperty("biddingStartDate")) {
+    //     return 1;
+    //   } else {
+    //     return 0;
+    //   }
+    // });
   });
 
   let search_query = "";
 
-  const filter = (val, query) => {
+  const filter = (val, query, selectedTab) => {
     let filtered_data = val ?? [];
+
+    filtered_data = filtered_data.filter((ipo) => {
+      if (selectedTab === 0) {
+        if (
+          ipo.hasOwnProperty("biddingStartDate") &&
+          new Date(ipo.biddingStartDate) <= new Date()
+        ) {
+          return true;
+        }
+      } else if (selectedTab === 1) {
+        if (
+          ipo.hasOwnProperty("biddingStartDate") &&
+          new Date(ipo.biddingStartDate) > new Date() || !ipo.hasOwnProperty("biddingStartDate")
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
 
     if (query !== "") {
       filtered_data = filtered_data.filter((ipo) =>
@@ -113,8 +132,9 @@
 
   // Use the debounced filter function in the UI.
   let filteredIpos = [];
+  let selected = 0;
   $: {
-    filteredIpos = filter(ipos, search_query);
+    filteredIpos = filter(ipos, search_query, selected);
   }
 
   const formatData = (data) => {
@@ -160,49 +180,99 @@
         </Column>
         <Column sm={14} md={2} lg={2}>
           <Button
-          size="small"
-          icon={Repeat}
-          iconDescription="Sync IPO"
-          disabled={syncStatus}
-          on:click={async ()=>{
-            syncIpo();
-          }}
-          >IPO</Button
-        >
+            size="small"
+            icon={Repeat}
+            iconDescription="Sync IPO"
+            disabled={syncStatus}
+            on:click={async () => {
+              syncIpo();
+            }}>IPO</Button
+          >
         </Column>
       </Row>
       <Row>
-        {#each filteredIpos as { _id, name, minPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
-          <Column sm={12} md={4} lg={4}>
-            <ClickableTile
-              href={`/ipo/${_id}`}
-              light={minPrice * minBidQuantity < 15001 &&
-                minPrice * minBidQuantity > 0}
-              ><h3 use:truncate>{name}</h3>
-              <p>
-                <span class="text--label">Min. Investment</span><br />
-                {formatCurrency(minPrice * minBidQuantity)}
-              </p>
-              <!-- <div class="tile--img">
-                <ImageLoader src={logoUrl}  />
-               </div> -->
-              {#if gmps.length > 0}
-                <!-- <AreaChart data={formatData(gmps)} {options}  /> -->
-                <p>
-                  <span class="text--label">Estimated return </span><br />{(
-                    ((minBidQuantity * gmps[0]["price"]) /
-                      (minPrice * minBidQuantity)) *
-                    100
-                  ).toFixed(2)}%
-                </p>
-                <p>
-                  <span class="text--label">Total estimated return</span><br
-                  />{formatCurrency(minBidQuantity * gmps[0]["price"])}
-                </p>
-              {/if}
-            </ClickableTile>
-          </Column>
-        {/each}
+        <Tabs type="container" bind:selected autoWidth>
+          <Tab label="Ongoing" />
+          <Tab label="Upcoming" />
+          <svelte:fragment slot="content">
+            <TabContent>
+              <Row>
+                {#each filteredIpos as { _id, name, minPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
+                  <Column sm={12} md={4} lg={4}>
+                    <ClickableTile
+                      href={`/ipo/${_id}`}
+                      light={minPrice * minBidQuantity < 15001 &&
+                        minPrice * minBidQuantity > 0}
+                      ><h3 use:truncate>{name}</h3>
+                      <p>
+                        <span class="text--label">Min. Investment</span><br />
+                        {formatCurrency(minPrice * minBidQuantity)}
+                      </p>
+                      <!-- <div class="tile--img">
+                    <ImageLoader src={logoUrl}  />
+                   </div> -->
+                      {#if gmps.length > 0}
+                        <!-- <AreaChart data={formatData(gmps)} {options}  /> -->
+                        <p>
+                          <span class="text--label">Estimated return </span><br
+                          />{(
+                            ((minBidQuantity * gmps[0]["price"]) /
+                              (minPrice * minBidQuantity)) *
+                            100
+                          ).toFixed(2)}%
+                        </p>
+                        <p>
+                          <span class="text--label">Total estimated return</span
+                          ><br />{formatCurrency(
+                            minBidQuantity * gmps[0]["price"]
+                          )}
+                        </p>
+                      {/if}
+                    </ClickableTile>
+                  </Column>
+                {/each}
+              </Row>
+            </TabContent>
+            <TabContent>
+              <Row>
+                {#each filteredIpos as { _id, name, minPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
+                  <Column sm={12} md={4} lg={4}>
+                    <ClickableTile
+                      href={`/ipo/${_id}`}
+                      light={minPrice * minBidQuantity < 15001 &&
+                        minPrice * minBidQuantity > 0}
+                      ><h3 use:truncate>{name}</h3>
+                      <p>
+                        <span class="text--label">Min. Investment</span><br />
+                        {formatCurrency(minPrice * minBidQuantity)}
+                      </p>
+                      <!-- <div class="tile--img">
+                    <ImageLoader src={logoUrl}  />
+                   </div> -->
+                      {#if gmps.length > 0}
+                        <!-- <AreaChart data={formatData(gmps)} {options}  /> -->
+                        <p>
+                          <span class="text--label">Estimated return </span><br
+                          />{(
+                            ((minBidQuantity * gmps[0]["price"]) /
+                              (minPrice * minBidQuantity)) *
+                            100
+                          ).toFixed(2)}%
+                        </p>
+                        <p>
+                          <span class="text--label">Total estimated return</span
+                          ><br />{formatCurrency(
+                            minBidQuantity * gmps[0]["price"]
+                          )}
+                        </p>
+                      {/if}
+                    </ClickableTile>
+                  </Column>
+                {/each}
+              </Row>
+            </TabContent>
+          </svelte:fragment>
+        </Tabs>
       </Row>
     </Grid>
   {/if}
