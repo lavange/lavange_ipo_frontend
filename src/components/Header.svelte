@@ -80,18 +80,19 @@
         <HeaderPanelLink>Switcher item 1</HeaderPanelLink> -->
         </HeaderPanelLinks>
       </HeaderAction>
-      <!-- <HeaderAction bind:isOpen={isOpen2}>
+      <HeaderAction bind:isOpen={isOpen2}>
       <HeaderPanelLinks>
-        <HeaderPanelDivider>Switcher subject 1</HeaderPanelDivider>
-        <HeaderPanelLink>Switcher item 1</HeaderPanelLink>
-        <HeaderPanelDivider>Switcher subject 2</HeaderPanelDivider>
+        <HeaderPanelLink href="/">Home</HeaderPanelLink>
+        <!-- <HeaderPanelDivider>Switcher subject 1</HeaderPanelDivider> -->
+        <HeaderPanelLink href="/activity">Activity</HeaderPanelLink>
+        <!-- <HeaderPanelDivider>Switcher subject 2</HeaderPanelDivider>
         <HeaderPanelLink>Switcher item 1</HeaderPanelLink>
         <HeaderPanelLink>Switcher item 2</HeaderPanelLink>
         <HeaderPanelLink>Switcher item 3</HeaderPanelLink>
         <HeaderPanelLink>Switcher item 4</HeaderPanelLink>
-        <HeaderPanelLink>Switcher item 5</HeaderPanelLink>
+        <HeaderPanelLink>Switcher item 5</HeaderPanelLink> -->
       </HeaderPanelLinks>
-    </HeaderAction> -->
+    </HeaderAction>
     </HeaderUtilities>
   {/if}
 </Header>

@@ -7,15 +7,38 @@
   import { ToastNotification } from "carbon-components-svelte";
   import { notifications } from "../helper/notification_store";
   import { token } from "../helper/token_store";
+  import { PUBLIC_API_URI } from "$env/static/public";
+  import { goto } from "$app/navigation";
 
   let theme = "g100"; // "white" | "g10" | "g80" | "g90" | "g100"
 
-  onMount(() => {
+  const authenticateToken = async (token_) => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${token_}`);
+
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+    };
+
+    const response = await fetch(`${PUBLIC_API_URI}/authenticate`, requestOptions);
+
+    const data = response.json();
+    return data;
+  };
+
+  onMount(async () => {
     document.documentElement.setAttribute("theme", theme);
 
     const getToken = localStorage.getItem("token");
     if(getToken){
-      token.set(getToken);
+      const response = await authenticateToken(getToken);
+      if(response && response.hasOwnProperty("status") && response["status"] === 200){
+        token.set(getToken);
+      }else {
+        goto(`/login`, { replaceState: true });
+      }
     }
   });
 </script>
