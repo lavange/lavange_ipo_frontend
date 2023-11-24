@@ -5,6 +5,7 @@
   import { token } from "../../helper/token_store";
   import { PUBLIC_API_URI } from "$env/static/public";
   import { goto } from "$app/navigation";
+  import { authenticate } from "../../helper/utils";
 
   let activities = null;
   let loading = true;
@@ -38,7 +39,7 @@
     if (!token_) {
       goto(`/login`, { replaceState: true });
     }
-    
+
     const authenticated = await authenticate(token_)
     console.log(authenticated)
     if(!authenticated){
