@@ -18,7 +18,7 @@
   } from "carbon-components-svelte";
   import { onMount, onDestroy } from "svelte";
   import { debounce, truncate } from "lodash";
-  import { formatCurrency } from "../helper/utils";
+  import { authenticate, formatCurrency } from "../helper/utils";
   import { AreaChart } from "@carbon/charts-svelte";
   import "@carbon/charts-svelte/styles.css";
   import { token } from "../helper/token_store";
@@ -72,8 +72,16 @@
 
   onMount(async () => {
     await token;
-    if (!token_) {
+    if (!token_ ) {
       goto(`/login`, { replaceState: true });
+      return;
+    }
+
+    const authenticated = await authenticate(token_)
+    console.log(authenticated)
+    if(!authenticated){
+      goto(`/logout`, { replaceState: true });
+      return;
     }
 
     const data = await fetchIPO();

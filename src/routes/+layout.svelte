@@ -22,45 +22,41 @@
       redirect: "follow",
     };
 
-    const response = await fetch(`${PUBLIC_API_URI}/authenticate`, requestOptions);
+    const response = await fetch(
+      `${PUBLIC_API_URI}/authenticate`,
+      requestOptions
+    );
 
     const data = response.json();
     return data;
   };
 
-  onMount(async () => {
+  onMount(() => {
     document.documentElement.setAttribute("theme", theme);
 
     const getToken = localStorage.getItem("token");
-    if(getToken){
-      const response = await authenticateToken(getToken);
-      if(response && response.hasOwnProperty("status") && response["status"] === 200){
-        token.set(getToken);
-      }else {
-        goto(`/login`, { replaceState: true });
-      }
+    if (getToken) {
+      token.set(getToken);
     }
   });
 </script>
 
 <div class="root">
+  <Header />
+  <slot />
+  <Footer />
 
-
-<Header />
-<slot />
-<Footer />
-
-<div class="notifications">
-{#each $notifications as notification (notification)}
-  <ToastNotification
-    lowContrast
-    kind="error"
-    title="Error"
-    subtitle="An internal server error occurred."
-    caption={new Date().toLocaleString()}
-  />
-{/each}
-</div>
+  <div class="notifications">
+    {#each $notifications as notification (notification)}
+      <ToastNotification
+        lowContrast
+        kind="error"
+        title="Error"
+        subtitle="An internal server error occurred."
+        caption={new Date().toLocaleString()}
+      />
+    {/each}
+  </div>
 </div>
 
 <style lang="scss">
@@ -78,7 +74,7 @@
 
   .notifications {
     position: fixed;
-   right: 0;
+    right: 0;
     bottom: 0;
   }
 </style>

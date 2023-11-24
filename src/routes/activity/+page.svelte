@@ -38,6 +38,13 @@
     if (!token_) {
       goto(`/login`, { replaceState: true });
     }
+    
+    const authenticated = await authenticate(token_)
+    console.log(authenticated)
+    if(!authenticated){
+      goto(`/logout`, { replaceState: true });
+    }
+
     const data = await fetchActivity();
     activities = data["data"]["activities"] ?? [];
     activities = activities.map((activity) => {

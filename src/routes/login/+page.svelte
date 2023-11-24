@@ -17,7 +17,8 @@
   import { token } from "../../helper/token_store";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import {PUBLIC_API_URI} from "$env/static/public";
+  import { PUBLIC_API_URI } from "$env/static/public";
+  import { authenticate } from "../../helper/utils";
 
   let token_;
   let username = "";
@@ -47,10 +48,7 @@
       redirect: "follow",
     };
 
-    const response = await fetch(
-      `${PUBLIC_API_URI}/login`,
-      requestOptions
-    );
+    const response = await fetch(`${PUBLIC_API_URI}/login`, requestOptions);
     const data = await response.json();
 
     if (data["status"] === 200) {
@@ -65,8 +63,16 @@
 
   onMount(async () => {
     await token;
+
     if (token_) {
+      const authenticated = await authenticate(token_);
+      if (!authenticated) {
+        goto(`/logout`, { replaceState: true });
+        return;
+      }
+
       goto("/", { replaceState: true });
+      return;
     }
   });
 </script>

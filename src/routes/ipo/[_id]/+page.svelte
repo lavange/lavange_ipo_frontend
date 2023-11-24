@@ -77,7 +77,16 @@
     await token;
     if (!token_) {
       goto(`/login`, { replaceState: true });
+      return;
     }
+
+    const authenticated = await authenticate(token_)
+    console.log(authenticated)
+    if(!authenticated){
+      goto(`/logout`, { replaceState: true });
+      return;
+    }
+
     const data = await fetchIPO();
     ipo = data["data"]["ipo"];
     gmpKey = ipo["gmpKey"];
