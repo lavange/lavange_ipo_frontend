@@ -10,7 +10,7 @@
     TextInput,
   } from "carbon-components-svelte";
   import { onMount } from "svelte";
-  import { formatCurrency, formatDate } from "../../../helper/utils";
+  import { authenticate, formatCurrency, formatDate } from "../../../helper/utils";
   import { AreaChart } from "@carbon/charts-svelte";
   import "@carbon/charts-svelte/styles.css";
   import WatsonHealthRotate_360 from "carbon-icons-svelte/lib/WatsonHealthRotate_360.svelte";
