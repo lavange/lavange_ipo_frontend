@@ -48,7 +48,7 @@
       redirect: "follow",
     };
 
-    const response = await fetch(`${PUBLIC_API_URI}/login`, requestOptions);
+    const response = await fetch(`${PUBLIC_API_URI}/user/login`, requestOptions);
     const data = await response.json();
 
     if (data["status"] === 200) {

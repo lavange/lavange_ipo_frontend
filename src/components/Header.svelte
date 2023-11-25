@@ -85,6 +85,7 @@
         <HeaderPanelLink href="/">Home</HeaderPanelLink>
         <!-- <HeaderPanelDivider>Switcher subject 1</HeaderPanelDivider> -->
         <HeaderPanelLink href="/activity">Activity</HeaderPanelLink>
+        <HeaderPanelLink href="/user">User</HeaderPanelLink>
         <!-- <HeaderPanelDivider>Switcher subject 2</HeaderPanelDivider>
         <HeaderPanelLink>Switcher item 1</HeaderPanelLink>
         <HeaderPanelLink>Switcher item 2</HeaderPanelLink>
