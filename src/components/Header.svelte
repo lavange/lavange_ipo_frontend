@@ -83,6 +83,7 @@
       <HeaderAction bind:isOpen={isOpen2}>
       <HeaderPanelLinks>
         <HeaderPanelLink href="/">Home</HeaderPanelLink>
+        <HeaderPanelLink href="/ipo">IPO</HeaderPanelLink>
         <!-- <HeaderPanelDivider>Switcher subject 1</HeaderPanelDivider> -->
         <HeaderPanelLink href="/activity">Activity</HeaderPanelLink>
         <HeaderPanelLink href="/user">User</HeaderPanelLink>
