@@ -296,10 +296,10 @@
           <svelte:fragment slot="content">
             <TabContent>
               <Row>
-                {#each filteredIpos as { _id, name, minPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
+                {#each filteredIpos as { id, name, minPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
                   <Column sm={12} md={4} lg={4}>
                     <ClickableTile
-                      href={`/ipo/${_id}`}
+                      href={`/ipo/${id}`}
                       light={minPrice * minBidQuantity < 15001 &&
                         minPrice * minBidQuantity > 0}
                       ><h3 use:truncate>{name}</h3>
@@ -340,10 +340,10 @@
             </TabContent>
             <TabContent>
               <Row>
-                {#each filteredIpos as { _id, name, minPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
+                {#each filteredIpos as { id, name, minPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
                   <Column sm={12} md={4} lg={4}>
                     <ClickableTile
-                      href={`/ipo/${_id}`}
+                      href={`/ipo/${id}`}
                       light={minPrice * minBidQuantity < 15001 &&
                         minPrice * minBidQuantity > 0}
                       ><h3 use:truncate>{name}</h3>
