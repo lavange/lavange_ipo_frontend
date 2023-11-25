@@ -25,12 +25,15 @@
   import { goto } from "$app/navigation";
   import { PUBLIC_API_URI } from "$env/static/public";
   import { Repeat } from "carbon-icons-svelte";
+  import * as idb from "idb";
 
   let ipos = null;
   let loading = true;
   let token_;
   let syncStatus = false;
   let stcg=15;
+  let total_amount_invested = 0;
+  let total_estimated_return = 0;
 
   token.subscribe((value) => {
     token_ = value;
@@ -52,6 +55,34 @@
     curve: "curveNatural",
     height: "200px",
   };
+
+  async function initDB() {
+    let db = await idb.openDB("lavange_ipo", 1, {
+      upgrade(upgradeDB, oldVersion, newVersion, transaction, event) {
+        upgradeDB.createObjectStore("applied_ipo", { keyPath: "id" });
+      },
+      blocked(currentVersion, blockedVersion, event) {},
+      blocking(currentVersion, blockedVersion, event) {},
+      terminated() {},
+    });
+
+    //db.createObjectStore("applied_ipo", { keyPath: "id" });
+    db.close();
+  }
+
+  async function fetchAppliedIPO() {
+    let db = await idb.openDB("lavange_ipo", 1);
+
+    let tx = db.transaction("applied_ipo", "readonly");
+    let store = tx.objectStore("applied_ipo");
+
+    // add, clear, count, delete, get, getAll, getAllKeys, getKey, put
+    let applied_ipos = await store.getAll();
+
+    db.close();
+
+    return applied_ipos;
+  }
 
   const fetchIPO = async () => {
     loading = true;
@@ -103,6 +134,21 @@
     //     return 0;
     //   }
     // });
+
+    await initDB();
+    const applied_ipos = await fetchAppliedIPO();
+
+    ipos = ipos.map((ipo) => {
+      let new_obj = {};
+      delete Object.assign(new_obj, ipo, { ["id"]: ipo["_id"] })["_id"];
+      new_obj["applied"] =
+        applied_ipos.find((applied_ipo) => applied_ipo["id"] === ipo["_id"]) !==
+        undefined
+          ? applied_ipos.find((applied_ipo) => applied_ipo["id"] === ipo["_id"])
+              .applied
+          : false;
+      return new_obj;
+    });
   });
 
   let search_query = "";
@@ -146,6 +192,20 @@
     filteredIpos = filter(ipos, search_query, selected);
   }
 
+  $: {
+    calculatePnL(filteredIpos)
+  }
+
+  const calculatePnL = (ipo_list) => {
+    total_amount_invested =  ipo_list.reduce((acc,curr)=>{
+       return curr.applied ? acc + curr.minPrice * curr.minBidQuantity : acc;
+    },0)
+
+    total_estimated_return = ipo_list.reduce((acc,curr)=>{
+       return curr.applied ? acc + (curr.gmps.length === 0 ? 0 : curr.gmps[0]["price"] * curr.minBidQuantity) : acc;
+    },0)
+  }
+
   const formatData = (data) => {
     return data.map((item) => {
       return {
@@ -182,6 +242,36 @@
   {:else if loading === true}
     <Loading />
   {:else}
+
+  <div>
+    <div>
+      <h4>Total Amount Invested {formatCurrency(total_amount_invested)}</h4>
+    </div>
+    <div>
+      <h4>
+        Total Estimated Profit {
+          formatCurrency(total_estimated_return)}
+      </h4>
+    </div>
+    <div>
+      <h4>
+        Total Estimated Profit in % {((total_estimated_return /
+          total_amount_invested) *
+          100).toFixed(2)}
+      </h4>
+    </div>
+    <div>
+      <h4>
+        Total Estimated Profit (after tax and commission) {formatCurrency(total_estimated_return - total_estimated_return * stcg/100)}
+      </h4>
+    </div>
+    <div>
+      <h4>
+        Total Estimated Profit (after tax and commission) in % {((total_estimated_return - total_estimated_return * stcg/100 ) / total_amount_invested * 100).toFixed(2)}
+      </h4>
+    </div>
+    <hr />
+  </div>
     <Grid padding fullWidth>
       <Row>
         <Column sm={14} md={2} lg={14}>
