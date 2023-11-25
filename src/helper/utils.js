@@ -16,6 +16,14 @@ export const formatDate = (date) => {
   }).format(new Date(date));
 };
 
+export const formatPercentage = (percentage) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "percent",
+    minimumFractionDigits: 2, // Adjust as needed
+    maximumFractionDigits: 2, // Adjust as needed
+  }).format(percentage);
+};
+
 export const authenticate = async (token) => {
   const authenticateToken = async (token_) => {
     var myHeaders = new Headers();
