@@ -10,17 +10,22 @@
     TextInput,
   } from "carbon-components-svelte";
   import { onMount } from "svelte";
-  import { authenticate, formatCurrency, formatDate } from "../../../helper/utils";
+  import {
+    authenticate,
+    formatCurrency,
+    formatDate,
+  } from "../../../helper/utils";
   import { AreaChart } from "@carbon/charts-svelte";
   import "@carbon/charts-svelte/styles.css";
   import WatsonHealthRotate_360 from "carbon-icons-svelte/lib/WatsonHealthRotate_360.svelte";
   import Repeat from "carbon-icons-svelte/lib/Repeat.svelte";
-  import { Edit } from "carbon-icons-svelte";
+  import { Edit, Copy } from "carbon-icons-svelte";
   import { notifications } from "../../../helper/notification_store";
   import { set } from "lodash";
   import { token } from "../../../helper/token_store";
   import { goto } from "$app/navigation";
-  import {PUBLIC_API_URI} from "$env/static/public";
+  import { PUBLIC_API_URI } from "$env/static/public";
+  import { ProgressIndicator, ProgressStep } from "carbon-components-svelte";
 
   let ipo = null;
   let loading = true;
@@ -80,9 +85,9 @@
       return;
     }
 
-    const authenticated = await authenticate(token_)
-    console.log(authenticated)
-    if(!authenticated){
+    const authenticated = await authenticate(token_);
+    console.log(authenticated);
+    if (!authenticated) {
       goto(`/logout`, { replaceState: true });
       return;
     }
@@ -143,10 +148,7 @@
       redirect: "follow",
     };
 
-    const response = await fetch(
-      `${PUBLIC_API_URI}/ipo`,
-      requestOptions
-    );
+    const response = await fetch(`${PUBLIC_API_URI}/ipo`, requestOptions);
 
     syncStatus = false;
   };
@@ -159,7 +161,13 @@
     <Loading />
   {:else}
     <div>
-      <h1>{ipo["name"]}</h1>
+      <h1>
+        {ipo["name"]}
+        <Button on:click={() => (navigator.clipboard.writeText(ipo["name"])) } 
+          iconDescription={ipo["name"]}
+          size="small" icon={Copy} kind="ghost"
+        ></Button>
+      </h1>
     </div>
     <hr />
     <div>
@@ -185,6 +193,9 @@
     {#if ipo.hasOwnProperty("biddingStartDate")}
       <div>
         <div class="text--label">Bidding Start Date</div>
+        <h2>{formatDate(ipo["biddingStartDate"])}</h2>
+
+        <div class="text--label">Bidding End Date</div>
         <h2>{formatDate(ipo["biddingStartDate"])}</h2>
       </div>
     {/if}
@@ -220,13 +231,20 @@
           </h2>
         </div>
         <div>
-          <div class="text--label">Total estimated return (after tax at {stcg}%) </div>
+          <div class="text--label">
+            Total estimated return (after tax at {stcg}%)
+          </div>
           <h2>
-            {formatCurrency((ipo["minBidQuantity"] * ipo["gmps"][0]["price"]) - ((ipo["minBidQuantity"] * ipo["gmps"][0]["price"]) * (stcg/100)))}
+            {formatCurrency(
+              ipo["minBidQuantity"] * ipo["gmps"][0]["price"] -
+                ipo["minBidQuantity"] * ipo["gmps"][0]["price"] * (stcg / 100)
+            )}
           </h2>
           <div class="text--label">Total tax liability</div>
           <h2>
-            {formatCurrency((ipo["minBidQuantity"] * ipo["gmps"][0]["price"]) * (stcg/100))}
+            {formatCurrency(
+              ipo["minBidQuantity"] * ipo["gmps"][0]["price"] * (stcg / 100)
+            )}
           </h2>
         </div>
       </div>
