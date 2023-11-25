@@ -25,7 +25,7 @@
   let ipo = null;
   let loading = true;
   let gmpKey = "";
-
+  let stcg = 15;
   let token_;
 
   token.subscribe((value) => {
@@ -217,6 +217,16 @@
           <div class="text--label">Total estimated return</div>
           <h2>
             {formatCurrency(ipo["minBidQuantity"] * ipo["gmps"][0]["price"])}
+          </h2>
+        </div>
+        <div>
+          <div class="text--label">Total estimated return (after tax at {stcg}%) </div>
+          <h2>
+            {formatCurrency((ipo["minBidQuantity"] * ipo["gmps"][0]["price"]) - ((ipo["minBidQuantity"] * ipo["gmps"][0]["price"]) * (stcg/100)))}
+          </h2>
+          <div class="text--label">Total tax liability</div>
+          <h2>
+            {formatCurrency((ipo["minBidQuantity"] * ipo["gmps"][0]["price"]) * (stcg/100))}
           </h2>
         </div>
       </div>

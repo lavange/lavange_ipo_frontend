@@ -30,6 +30,7 @@
   let loading = true;
   let token_;
   let syncStatus = false;
+  let stcg=15;
 
   token.subscribe((value) => {
     token_ = value;
@@ -233,6 +234,12 @@
                           <span class="text--label">Total estimated return</span
                           ><br />{formatCurrency(
                             minBidQuantity * gmps[0]["price"]
+                          )}
+                        </p>
+                        <p>
+                          <span class="text--label">Total estimated return (after tax at {stcg}%)</span
+                          ><br />{formatCurrency(
+                            (minBidQuantity * gmps[0]["price"]) - ((minBidQuantity * gmps[0]["price"]) * (stcg/100))
                           )}
                         </p>
                       {/if}
