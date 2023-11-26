@@ -20,6 +20,7 @@
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      mode: 'cors'
     };
 
     const response = await fetch(

@@ -66,6 +66,7 @@
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      mode: 'cors'
     };
 
     const response = await fetch(
@@ -118,6 +119,7 @@
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      mode: 'cors'
     };
 
     const response = await fetch(
@@ -146,6 +148,7 @@
       headers: myHeaders,
       body: raw,
       redirect: "follow",
+      mode: 'cors'
     };
 
     const response = await fetch(`${PUBLIC_API_URI}/ipo`, requestOptions);
@@ -202,7 +205,7 @@
 
     <div>
       <div class="text--label">Min.Investment</div>
-      <h2>{formatCurrency(ipo["minPrice"] * ipo["minBidQuantity"])}</h2>
+      <h2>{formatCurrency(ipo["maxPrice"] * ipo["minBidQuantity"])}</h2>
     </div>
 
     <div>
@@ -219,7 +222,7 @@
           <h2>
             {(
               ((ipo["minBidQuantity"] * ipo["gmps"][0]["price"]) /
-                (ipo["minPrice"] * ipo["minBidQuantity"])) *
+                (ipo["maxPrice"] * ipo["minBidQuantity"])) *
               100
             ).toFixed(2)}%
           </h2>

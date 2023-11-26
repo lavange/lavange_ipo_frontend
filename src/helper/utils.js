@@ -33,6 +33,7 @@ export const authenticate = async (token) => {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      mode: 'cors'
     };
 
     const response = await fetch(

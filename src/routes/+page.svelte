@@ -11,6 +11,7 @@
   } from "carbon-components-svelte";
   import { debounce, truncate } from "lodash";
   import { token } from "../helper/token_store";
+  import { goto } from "$app/navigation";
 
   import * as idb from "idb";
   import { onMount } from "svelte";
@@ -150,7 +151,7 @@
   const calculatePnL = (ipo_list) => {
     pnl_calculations.total_amount_invested.amount = ipo_list.reduce(
       (acc, curr) => {
-        return curr.applied ? acc + curr.minPrice * curr.minBidQuantity : acc;
+        return curr.applied ? acc + curr.maxPrice * curr.minBidQuantity : acc;
       },
       0
     );
