@@ -76,6 +76,7 @@
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      mode: 'cors'
     };
 
     const response = await fetch(`${PUBLIC_API_URI}/ipo`, requestOptions);
@@ -226,7 +227,7 @@
 
   const calculatePnL = (ipo_list) => {
     total_amount_invested =  ipo_list.reduce((acc,curr)=>{
-       return curr.applied ? acc + curr.minPrice * curr.minBidQuantity : acc;
+       return curr.applied ? acc + curr.maxPrice * curr.minBidQuantity : acc;
     },0)
 
     total_estimated_return = ipo_list.reduce((acc,curr)=>{
@@ -253,6 +254,7 @@
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      mode: 'cors'
     };
 
     const response = await fetch(
@@ -339,7 +341,7 @@
       <div>
         <Form on:submit={submitForm}>
           <FormGroup legendText="Select the applied IPOs from the Ongoing IPOs">
-            <!--{ _id, name, minPrice, minBidQuantity, logoUrl, symbol, seoName, gmps, applied }-->
+            <!--{ _id, name, maxPrice, minBidQuantity, logoUrl, symbol, seoName, gmps, applied }-->
             {#each filteredIpos as ipo ((ipo.id, ipo.applied, ipo.name))}
               <Checkbox
                 id={ipo.id}

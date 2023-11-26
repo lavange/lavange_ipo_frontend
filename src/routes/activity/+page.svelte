@@ -25,6 +25,7 @@
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      mode: 'cors'
     };
 
     const response = await fetch(`${PUBLIC_API_URI}/activity`, requestOptions);

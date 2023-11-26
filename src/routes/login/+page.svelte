@@ -46,6 +46,7 @@
       headers: myHeaders,
       body: raw,
       redirect: "follow",
+      mode: 'cors'
     };
 
     const response = await fetch(`${PUBLIC_API_URI}/user/login`, requestOptions);

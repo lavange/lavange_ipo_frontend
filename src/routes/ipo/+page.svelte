@@ -143,6 +143,7 @@
         method: "GET",
         headers: myHeaders,
         redirect: "follow",
+        mode: 'cors'
       };
   
       const response = await fetch(`${PUBLIC_API_URI}/ipo`, requestOptions);
@@ -249,7 +250,7 @@
     const calculatePnL = (ipo_list) => {
     pnl_calculations.total_amount_invested.amount = ipo_list.reduce(
       (acc, curr) => {
-        return curr.applied ? acc + curr.minPrice * curr.minBidQuantity : acc;
+        return curr.applied ? acc + curr.maxPrice * curr.minBidQuantity : acc;
       },
       0
     );
@@ -290,6 +291,7 @@
         method: "GET",
         headers: myHeaders,
         redirect: "follow",
+        mode: 'cors'
       };
   
       const response = await fetch(
@@ -366,16 +368,16 @@
             <svelte:fragment slot="content">
               <TabContent>
                 <Row>
-                  {#each filteredIpos as { _id, name, minPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
+                  {#each filteredIpos as { _id, name, maxPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
                     <Column sm={12} md={4} lg={4}>
                       <ClickableTile
                         href={`/ipo/${_id}`}
-                        light={minPrice * minBidQuantity < 15001 &&
-                          minPrice * minBidQuantity > 0}
+                        light={maxPrice * minBidQuantity < 15001 &&
+                          maxPrice * minBidQuantity > 0}
                         ><h3 use:truncate>{name}</h3>
                         <p>
                           <span class="text--label">Min. Investment</span><br />
-                          {formatCurrency(minPrice * minBidQuantity)}
+                          {formatCurrency(maxPrice * minBidQuantity)}
                         </p>
                         <!-- <div class="tile--img">
                       <ImageLoader src={logoUrl}  />
@@ -386,7 +388,7 @@
                             <span class="text--label">Estimated return </span><br
                             />{(
                               ((minBidQuantity * gmps[0]["price"]) /
-                                (minPrice * minBidQuantity)) *
+                                (maxPrice * minBidQuantity)) *
                               100
                             ).toFixed(2)}%
                           </p>
@@ -410,16 +412,16 @@
               </TabContent>
               <TabContent>
                 <Row>
-                  {#each filteredIpos as { _id, name, minPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
+                  {#each filteredIpos as { _id, name, maxPrice, minBidQuantity, logoUrl, symbol, seoName, gmps }}
                     <Column sm={12} md={4} lg={4}>
                       <ClickableTile
                         href={`/ipo/${_id}`}
-                        light={minPrice * minBidQuantity < 15001 &&
-                          minPrice * minBidQuantity > 0}
+                        light={maxPrice * minBidQuantity < 15001 &&
+                          maxPrice * minBidQuantity > 0}
                         ><h3 use:truncate>{name}</h3>
                         <p>
                           <span class="text--label">Min. Investment</span><br />
-                          {formatCurrency(minPrice * minBidQuantity)}
+                          {formatCurrency(maxPrice * minBidQuantity)}
                         </p>
                         <!-- <div class="tile--img">
                       <ImageLoader src={logoUrl}  />
@@ -430,7 +432,7 @@
                             <span class="text--label">Estimated return </span><br
                             />{(
                               ((minBidQuantity * gmps[0]["price"]) /
-                                (minPrice * minBidQuantity)) *
+                                (maxPrice * minBidQuantity)) *
                               100
                             ).toFixed(2)}%
                           </p>
