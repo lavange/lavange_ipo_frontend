@@ -1,5 +1,6 @@
 //@ts-nocheck
 import { PUBLIC_API_URI } from "$env/static/public";
+import { notifications } from "./notification_store";
 
 export const formatCurrency = (number) => {
   return new Intl.NumberFormat("en-IN", {
@@ -33,7 +34,7 @@ export const authenticate = async (token) => {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
-      mode: 'cors'
+      mode: "cors",
     };
 
     const response = await fetch(
@@ -42,6 +43,7 @@ export const authenticate = async (token) => {
     );
 
     const data = response.json();
+
     return data;
   };
 
@@ -52,7 +54,17 @@ export const authenticate = async (token) => {
     response["status"] === 200
   ) {
     return true;
+  } else {
+    errorNotification("Authentication Failed!")
   }
 
   return false;
+};
+
+export const successNotification = (title) => {
+  notifications.update((items) => [...items, { status: "success", title }]);
+};
+
+export const errorNotification = (title) => {
+  notifications.update((items) => [...items, { status: "error", title }]);
 };

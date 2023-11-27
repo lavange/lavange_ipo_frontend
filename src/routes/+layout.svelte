@@ -51,9 +51,8 @@
     {#each $notifications as notification (notification)}
       <ToastNotification
         lowContrast
-        kind="error"
-        title="Error"
-        subtitle="An internal server error occurred."
+        kind={notification.status}
+        title={notification.title}
         caption={new Date().toLocaleString()}
       />
     {/each}
