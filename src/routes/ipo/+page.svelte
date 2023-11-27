@@ -21,8 +21,10 @@
   import { debounce, truncate } from "lodash";
   import {
     authenticate,
+    errorNotification,
     formatCurrency,
     formatPercentage,
+    successNotification,
   } from "../../helper/utils";
   import { AreaChart } from "@carbon/charts-svelte";
   import "@carbon/charts-svelte/styles.css";
@@ -152,7 +154,7 @@
 
     const response = await fetch(`${PUBLIC_API_URI}/ipo`, requestOptions);
 
-    const data = response.json();
+    const data = await response.json();
     loading = false;
     return data;
   };
@@ -299,19 +301,35 @@
       mode: "cors",
     };
 
+    let response;
+
     if (force) {
-      const response = await fetch(
+      response = await fetch(
         `${PUBLIC_API_URI}/ipo/refresh?force=true`,
         requestOptions
       );
     } else {
-      const response = await fetch(
-        `${PUBLIC_API_URI}/ipo/refresh`,
-        requestOptions
-      );
+      response = await fetch(`${PUBLIC_API_URI}/ipo/refresh`, requestOptions);
     }
 
     syncStatus = false;
+    response = await response.json();
+
+    if (
+      response &&
+      response.hasOwnProperty("status") &&
+      response["status"] === 200
+    ) {
+      successNotification("IPO Refreshed!");
+    } else {
+      errorNotification("IPO Refresh Failed!");
+    }
+  };
+
+  const handleSyncIpo = async () => {
+    await syncIpo();
+    const data = await fetchIPO();
+    ipos = data["data"]["ipos"] ?? [];
   };
 </script>
 
@@ -354,9 +372,7 @@
             icon={Repeat}
             iconDescription="Sync IPO"
             disabled={syncStatus}
-            on:click={async () => {
-              syncIpo();
-            }}>IPO</Button
+            on:click={handleSyncIpo}>IPO</Button
           >
 
           <Button
@@ -365,7 +381,7 @@
             iconDescription="Sync IPO"
             disabled={syncStatus}
             on:click={async () => {
-              syncIpo(true);
+              await handleSyncIpo(true);
             }}>Force IPO</Button
           >
         </ButtonSet>

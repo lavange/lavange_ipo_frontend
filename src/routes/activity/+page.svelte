@@ -1,6 +1,6 @@
 <script>
   //@ts-nocheck
-  import { Content, DataTable, Loading } from "carbon-components-svelte";
+  import { Content, DataTable, Loading, Pagination } from "carbon-components-svelte";
   import { onMount, onDestroy } from "svelte";
   import { token } from "../../helper/token_store";
   import { PUBLIC_API_URI } from "$env/static/public";
@@ -9,6 +9,8 @@
 
   let activities = null;
   let loading = true;
+  let pageSize = 10;
+  let page = 1;
 
   let token_;
 
@@ -34,6 +36,10 @@
     loading = false;
     return data;
   };
+
+  const handleRowClick = (row)=>{
+    console.log(row)
+  }
 
   onMount(async () => {
     await token;
@@ -98,6 +104,15 @@
         { key: "description", value: "Description" },
       ]}
       rows={activities}
+      {pageSize}
+      on:click:row={handleRowClick}
+  {page}
     />
+    <Pagination
+  bind:pageSize
+  bind:page
+  totalItems={activities.length}
+  pageSizeInputDisabled
+/>
   {/if}
 </Content>

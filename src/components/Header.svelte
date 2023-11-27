@@ -88,6 +88,8 @@
         <HeaderPanelLink href="/activity">Activity</HeaderPanelLink>
         <HeaderPanelLink href="/user">User</HeaderPanelLink>
         <HeaderPanelLink href="/calculator">Calculator</HeaderPanelLink>
+        <HeaderPanelLink href="/order">Order</HeaderPanelLink>
+        <HeaderPanelLink href="/stock">Stock</HeaderPanelLink>
         <!-- <HeaderPanelDivider>Switcher subject 2</HeaderPanelDivider>
         <HeaderPanelLink>Switcher item 1</HeaderPanelLink>
         <HeaderPanelLink>Switcher item 2</HeaderPanelLink>

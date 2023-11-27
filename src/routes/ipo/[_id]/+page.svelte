@@ -12,8 +12,10 @@
   import { onMount } from "svelte";
   import {
     authenticate,
+    errorNotification,
     formatCurrency,
     formatDate,
+    successNotification,
   } from "../../../helper/utils";
   import { AreaChart } from "@carbon/charts-svelte";
   import "@carbon/charts-svelte/styles.css";
@@ -66,7 +68,7 @@
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
-      mode: 'cors'
+      mode: "cors",
     };
 
     const response = await fetch(
@@ -74,7 +76,7 @@
       requestOptions
     );
 
-    const data = response.json();
+    const data = await response.json();
     loading = false;
     return data;
   };
@@ -119,15 +121,33 @@
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
-      mode: 'cors'
+      mode: "cors",
     };
 
-    const response = await fetch(
+    let response = await fetch(
       `${PUBLIC_API_URI}/gmp/refresh/${ipo["_id"]}`,
       requestOptions
     );
 
     syncStatus = false;
+
+    response = await response.json();
+
+    if (
+      response &&
+      response.hasOwnProperty("status") &&
+      response["status"] === 200
+    ) {
+      successNotification("GMP Refreshed!");
+    } else {
+      errorNotification("GMP Refresh Failed!");
+    }
+  };
+
+  const handleSyncGmp = async () => {
+    await syncGmp();
+    const data = await fetchIPO();
+    ipo = data["data"]["ipo"];
   };
 
   let open = false;
@@ -148,12 +168,26 @@
       headers: myHeaders,
       body: raw,
       redirect: "follow",
-      mode: 'cors'
+      mode: "cors",
     };
 
-    const response = await fetch(`${PUBLIC_API_URI}/ipo`, requestOptions);
+    let response = await fetch(`${PUBLIC_API_URI}/ipo`, requestOptions);
 
     syncStatus = false;
+
+    response = await response.json();
+
+    console.log(response);
+
+    if (
+      response &&
+      response.hasOwnProperty("status") &&
+      response["status"] === 200
+    ) {
+      successNotification("GMP Updated!");
+    } else {
+      errorNotification("GMP Update Failed!");
+    }
   };
 </script>
 
@@ -166,9 +200,12 @@
     <div>
       <h1>
         {ipo["name"]}
-        <Button on:click={() => (navigator.clipboard.writeText(ipo["name"])) } 
+        <Button
+          on:click={() => navigator.clipboard.writeText(ipo["name"])}
           iconDescription={ipo["name"]}
-          size="small" icon={Copy} kind="ghost"
+          size="small"
+          icon={Copy}
+          kind="ghost"
         ></Button>
       </h1>
     </div>
@@ -186,9 +223,7 @@
         icon={Repeat}
         iconDescription="Sync GMP"
         disabled={syncStatus}
-        on:click={async () => {
-          await syncGmp();
-        }}>GMP</Button
+        on:click={handleSyncGmp}>GMP</Button
       >
     </div>
     <hr />
@@ -266,7 +301,6 @@
       on:close
       on:submit={async () => {
         await updateGMPKey();
-        notifications.update((items) => [...items, { name: "ok" }]);
         open = false;
       }}
     >

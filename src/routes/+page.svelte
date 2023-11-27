@@ -44,6 +44,14 @@
       id: "calculator",
       title: "Calculator",
     },
+    // {
+    //   id: "order",
+    //   title: "Order",
+    // },
+    {
+      id:"stock",
+      title: "Stock"
+    }
   ];
 
   const FORMAT = {
