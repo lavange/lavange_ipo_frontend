@@ -9,7 +9,8 @@
     ToolbarSearch,
     ToolbarMenu,
     ToolbarMenuItem,
-    Button
+    Button,
+    Pagination,
   } from "carbon-components-svelte";
   import { onMount, onDestroy } from "svelte";
   import { token } from "../../helper/token_store";
@@ -19,6 +20,8 @@
 
   let stocks = null;
   let loading = true;
+  let pageSize = 10;
+  let page = 1;
 
   let token_;
 
@@ -110,10 +113,16 @@
         { key: "id", value: "Stock Id" },
         { key: "symbol", value: "Symbol" },
         { key: "name", value: "Company Name" },
-        { key: "updatedAt", value: "Modified", display: (date) => new Date(date).toLocaleString() },
+        {
+          key: "updatedAt",
+          value: "Modified",
+          display: (date) => new Date(date).toLocaleString(),
+        },
       ]}
       rows={stocks}
       on:click:row={handleRowClick}
+      {pageSize}
+      {page}
     >
       <Toolbar>
         <ToolbarContent>
@@ -132,5 +141,11 @@
         </ToolbarContent>
       </Toolbar>
     </DataTable>
+    <Pagination
+      bind:pageSize
+      bind:page
+      totalItems={stocks.length}
+      pageSizeInputDisabled
+    />
   {/if}
 </Content>
