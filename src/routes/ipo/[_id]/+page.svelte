@@ -15,6 +15,7 @@
     errorNotification,
     formatCurrency,
     formatDate,
+    hasRight,
     successNotification,
   } from "../../../helper/utils";
   import { AreaChart } from "@carbon/charts-svelte";
@@ -28,12 +29,15 @@
   import { goto } from "$app/navigation";
   import { PUBLIC_API_URI } from "$env/static/public";
   import { ProgressIndicator, ProgressStep } from "carbon-components-svelte";
+  import { RightType } from "../../../helper/constants";
+  import * as jwt from "jsonwebtoken-esm";
 
   let ipo = null;
   let loading = true;
   let gmpKey = "";
   let stcg = 15;
   let token_;
+  let rights = [];
 
   token.subscribe((value) => {
     token_ = value;
@@ -98,6 +102,12 @@
     const data = await fetchIPO();
     ipo = data["data"]["ipo"];
     gmpKey = ipo["gmpKey"];
+
+    let decodedToken = await jwt.decode(token_, {
+      complete: true,
+    });
+
+    rights = await decodedToken.payload.role.rights;
   });
 
   const formatData = (data) => {
@@ -216,13 +226,13 @@
         size="small"
         icon={Edit}
         iconDescription="GMP Key"
-        disabled={syncStatus}>GMP Key</Button
+        disabled={syncStatus || !hasRight(RightType.UPDATE_IPO,rights)}>GMP Key</Button
       >
       <Button
         size="small"
         icon={Repeat}
         iconDescription="Sync GMP"
-        disabled={syncStatus}
+        disabled={syncStatus || !hasRight(RightType.UPDATE_IPO,rights)}
         on:click={handleSyncGmp}>GMP</Button
       >
     </div>
