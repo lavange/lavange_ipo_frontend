@@ -24,14 +24,56 @@
   import { token } from "../helper/token_store";
   import { onMount } from "svelte";
   import * as jwt from "jsonwebtoken-esm";
+  import { RightType } from "../helper/constants";
+  import { hasRight } from "../helper/utils";
 
   let isSideNavOpen = false;
   let isOpen1 = false;
   let isOpen2 = false;
   let decodedToken;
   let name = "";
+  let _id = "";
+  let rights = [];
 
   let token_;
+
+  const menu_items = [
+    {
+      id: "ipo",
+      title: "IPO",
+      right: RightType.VIEW_IPO
+    },
+    {
+      id: "activity",
+      title: "Activity",
+      right: RightType.VIEW_ACTIVITY
+    },
+    {
+      id: "user",
+      title: "User",
+      right: RightType.VIEW_USER
+    },
+    {
+      id: "calculator",
+      title: "Calculator",
+      right: RightType.VIEW_IPO
+    },
+    {
+      id: "order",
+      title: "Order",
+      right: RightType.VIEW_ORDER
+    },
+    {
+      id:"stock",
+      title: "Stock",
+      right: RightType.VIEW_STOCK
+    },
+    {
+      id:"role",
+      title: "Role",
+      right: RightType.VIEW_ROLE
+    }
+  ];
 
   token.subscribe((value) => {
     token_ = value;
@@ -39,17 +81,25 @@
 
   onMount(async () => {
     await token;
-    decodedToken = jwt.decode(token_, {
+    decodedToken = await jwt.decode(token_, {
       complete: true,
     });
     console.log(decodedToken);
+
+    rights =  decodedToken.payload.role.rights;
+
     if (decodedToken) {
       name =
         decodedToken.payload.firstName + " " + decodedToken.payload.lastName;
     }
   });
 
-  $:  decodedToken ? name = decodedToken.payload.firstName + " " + decodedToken.payload.lastName : "";
+  $: { 
+    decodedToken ? name = decodedToken.payload.firstName + " " + decodedToken.payload.lastName : ""; 
+     if(decodedToken) {
+      _id = decodedToken.payload.userId
+     }
+  }
 </script>
 
 <Header company="Lavange" platformName="IPO" bind:isSideNavOpen>
@@ -66,6 +116,9 @@
         text={name}
       >
         <HeaderPanelLinks>
+          {#if hasRight(RightType.VIEW_USER,rights)}
+          <HeaderPanelLink href={`/user/${_id}`}>User</HeaderPanelLink>
+          {/if}
           <HeaderPanelLink href="/logout">Log out</HeaderPanelLink>
 
           <!-- <HeaderPanelDivider>Switcher subject 1</HeaderPanelDivider>
@@ -83,13 +136,9 @@
       <HeaderAction bind:isOpen={isOpen2}>
       <HeaderPanelLinks>
         <HeaderPanelLink href="/">Home</HeaderPanelLink>
-        <HeaderPanelLink href="/ipo">IPO</HeaderPanelLink>
-        <!-- <HeaderPanelDivider>Switcher subject 1</HeaderPanelDivider> -->
-        <HeaderPanelLink href="/activity">Activity</HeaderPanelLink>
-        <HeaderPanelLink href="/user">User</HeaderPanelLink>
-        <HeaderPanelLink href="/calculator">Calculator</HeaderPanelLink>
-        <HeaderPanelLink href="/order">Order</HeaderPanelLink>
-        <HeaderPanelLink href="/stock">Stock</HeaderPanelLink>
+        {#each menu_items.filter((item_)=>hasRight(item_.right,rights)) as {id,title}}
+        <HeaderPanelLink href={id} >{title}</HeaderPanelLink>
+        {/each}
         <!-- <HeaderPanelDivider>Switcher subject 2</HeaderPanelDivider>
         <HeaderPanelLink>Switcher item 1</HeaderPanelLink>
         <HeaderPanelLink>Switcher item 2</HeaderPanelLink>

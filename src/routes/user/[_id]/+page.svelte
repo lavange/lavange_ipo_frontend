@@ -10,6 +10,7 @@
     FormGroup,
     Grid,
     Link,
+    ListItem,
     Loading,
     Modal,
     NumberInput,
@@ -17,6 +18,7 @@
     SelectItem,
     TextInput,
     Tooltip,
+    UnorderedList,
   } from "carbon-components-svelte";
   import { onMount } from "svelte";
   import {
@@ -24,6 +26,7 @@
     errorNotification,
     formatCurrency,
     formatDate,
+    hasRight,
     successNotification,
   } from "../../../helper/utils";
   import { AreaChart } from "@carbon/charts-svelte";
@@ -37,20 +40,23 @@
   import { goto } from "$app/navigation";
   import { PUBLIC_API_URI } from "$env/static/public";
   import { ProgressIndicator, ProgressStep } from "carbon-components-svelte";
+  import * as jwt from "jsonwebtoken-esm";
+  import { RightType } from "../../../helper/constants";
 
-  let stock = null;
-  let default_stock = null;
+  let user = null;
+  let default_user = null;
   let loading = true;
   let stcg = 15;
   let token_;
   let edit_commission = false;
-  let stock_id = "";
+  let user_id = "";
+  let rights = [];
 
   token.subscribe((value) => {
     token_ = value;
   });
 
-  const fetchStock = async () => {
+  const fetchUser = async () => {
     loading = true;
     var myHeaders = new Headers();
     myHeaders.append("Authorization", `Bearer ${token_}`);
@@ -63,7 +69,7 @@
     };
 
     const response = await fetch(
-      `${PUBLIC_API_URI}/stock/${$page.params._id}`,
+      `${PUBLIC_API_URI}/user/${$page.params._id}`,
       requestOptions
     );
 
@@ -72,13 +78,13 @@
     return data;
   };
 
-  const updateStock = async (stock_) => {
+  const updateUser = async (user_) => {
     loading = true;
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Authorization", `Bearer ${token_}`);
 
-    var raw = JSON.stringify(stock_);
+    var raw = JSON.stringify(user_);
 
     var requestOptions = {
       method: "POST",
@@ -88,20 +94,20 @@
       mode: "cors",
     };
 
-    const response = await fetch(`${PUBLIC_API_URI}/stock`, requestOptions);
+    const response = await fetch(`${PUBLIC_API_URI}/user`, requestOptions);
     const data = await response.json();
     loading = false;
     return data;
   };
 
-  const deleteStock = async (stock_) => {
+  const deleteUser = async (user_) => {
     loading = true;
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Authorization", `Bearer ${token_}`);
 
-    stock_['deleted'] = true;
-    var raw = JSON.stringify(stock_);
+    user_["deleted"] = true;
+    var raw = JSON.stringify(user_);
 
     var requestOptions = {
       method: "POST",
@@ -111,19 +117,19 @@
       mode: "cors",
     };
 
-    const response = await fetch(`${PUBLIC_API_URI}/stock`, requestOptions);
+    const response = await fetch(`${PUBLIC_API_URI}/user`, requestOptions);
     const data = await response.json();
     loading = false;
     return data;
   };
 
   const preFillForm = () => {
-    stock = {
+    user = {
       _id: null,
       symbol: "",
     };
 
-    default_stock = {
+    default_user = {
       _id: null,
       symbol: "",
     };
@@ -134,37 +140,36 @@
     e.preventDefault();
     console.log("submit", e);
 
-    const response = await updateStock(stock);
+    const response = await updateUser(user);
 
     if (response.status === 200) {
-      goto(`/stock/${response["data"]["stock"]["_id"]}`, {
+      goto(`/user/${response["data"]["user"]["_id"]}`, {
         replaceState: true,
       });
-      stock_id = stock["_id"];
-      successNotification("Stock Updated!");
+      user_id = user["_id"];
+      successNotification("User Updated!");
     } else {
-      errorNotification("Stock Update Failed!");
+      errorNotification("User Update Failed!");
     }
   };
 
   const cancelUpdate = () => {
-    stock_id = stock["_id"];
-    stock = default_stock;
+    user_id = user["_id"];
+    user = default_user;
   };
 
   const handleDelete = async () => {
-
-    const response = await deleteStock(stock);
+    const response = await deleteUser(user);
 
     if (response.status === 200) {
-      goto(`/stock`, {
+      goto(`/user`, {
         replaceState: true,
       });
-      successNotification("Stock Deleted!");
+      successNotification("User Deleted!");
     } else {
-      errorNotification("Stock Deletion Failed!");
+      errorNotification("User Deletion Failed!");
     }
-  }
+  };
 
   onMount(async () => {
     await token;
@@ -180,68 +185,70 @@
       return;
     }
 
-    stock_id = $page.params._id;
+    user_id = $page.params._id;
 
-    if (stock_id !== "create") {
-      const data = await fetchStock();
-      stock = data["data"]["stock"];
-      default_stock = data["data"]["stock"];
-      //edit_commission = stock.commission !== 0;
+    if (user_id !== "create") {
+      const data = await fetchUser();
+      user = data["data"]["user"];
+      default_user = data["data"]["user"];
+      //edit_commission = user.commission !== 0;
     }
 
-    if (stock_id === "create") {
+    if (user_id === "create") {
       preFillForm();
     }
+
+    let decodedToken = await jwt.decode(token_, {
+      complete: true,
+    });
+
+
+    rights = await decodedToken.payload.role.rights;
   });
 
   //   $: {
-  //     console.log(stock);
+  //     console.log(user);
   //   }
 </script>
 
 <Content>
-  {#if stock === null && loading === false}
+  {#if user === null && loading === false}
     Nothing to show!
   {:else if loading === true}
     <Loading />
-  {:else if stock_id === "create" || stock_id === "update"}
-    <div class="margin--bottom">
-      <h1>Stock Form</h1>
+  {:else if user_id === "create" || user_id === "update"}
+    <!-- <div class="margin--bottom">
+      <h1>User Form</h1>
       <hr />
     </div>
     <Form on:submit={submitForm}>
       <FormGroup>
         <TextInput
           id="symbol"
-          placeholder="Enter Stock Symbol"
-          bind:value={stock.symbol}
+          placeholder="Enter User Symbol"
+          bind:value={user.symbol}
         />
       </FormGroup>
       <FormGroup>
         <TextInput
           id="name"
           placeholder="Enter Company Name"
-          bind:value={stock.name}
+          bind:value={user.name}
         />
       </FormGroup>
       <FormGroup>
-        <TextInput
-          id="isin"
-          placeholder="Enter ISIN"
-          bind:value={stock.isin}
-        />
+        <TextInput id="isin" placeholder="Enter ISIN" bind:value={user.isin} />
       </FormGroup>
-      <Button type="submit"
-        >{stock_id === "create" ? "Create" : "Update"}</Button
+      <Button type="submit">{user_id === "create" ? "Create" : "Update"}</Button
       >
-      {#if stock_id === "update"}
+      {#if user_id === "update"}
         <Button on:click={cancelUpdate}>Cancel</Button>{/if}
-    </Form>
+    </Form> -->
   {:else}
     <h1>
-      {stock.symbol} Stock <Button
-        on:click={() => navigator.clipboard.writeText(stock["symbol"])}
-        iconDescription={stock["symbol"]}
+      User {user._id}<Button
+        on:click={() => navigator.clipboard.writeText(user["_id"])}
+        iconDescription={user["_id"]}
         size="small"
         icon={Copy}
         kind="ghost"
@@ -249,28 +256,66 @@
     </h1>
     <hr />
     <div class="margin--bottom">
-      <div class="text--label">Symbol</div>
-      <h2>{stock["symbol"]}</h2>
+      <div class="text--label">Username</div>
+      <h2>{user["username"]}<Button
+        on:click={() => navigator.clipboard.writeText(user["username"])}
+        iconDescription={user["username"]}
+        size="small"
+        icon={Copy}
+        kind="ghost"
+      ></Button></h2>
     </div>
     <div class="margin--bottom">
-      <div class="text--label">Company Name</div>
-      <h2>{stock["name"]}</h2>
+      <div class="text--label">First Name</div>
+      <h2>{user["firstName"]}</h2>
     </div>
     <div class="margin--bottom">
-      <div class="text--label">ISIN</div>
-      <h2>{stock["isin"]}</h2>
+      <div class="text--label">Last Name</div>
+      <h2>{user["lastName"]}</h2>
+    </div>
+    <div class="margin--bottom">
+      <div class="text--label">Email</div>
+      <h2>{user["email"]}<Button
+        on:click={() => navigator.clipboard.writeText(user["email"])}
+        iconDescription={user["email"]}
+        size="small"
+        icon={Copy}
+        kind="ghost"
+      ></Button></h2>
+    </div>
+    <div class="margin--bottom">
+      <div class="text--label">Role</div>
+      <h2>{user["role"]["name"]}</h2>
+    </div>
+    <div class="margin--bottom">
+      <div class="text--label">Rights</div>
+      <UnorderedList>
+        {#each user["role"]["rights"] as right}
+          <ListItem>{right}</ListItem>
+        {/each}
+      </UnorderedList>
+    </div>
+    <div class="margin--bottom">
+      <div class="text--label">Account</div>
+      <h2>{user["account"]["_id"]}<Button
+        on:click={() => navigator.clipboard.writeText(user["account"]["_id"])}
+        iconDescription={user["account"]["_id"]}
+        size="small"
+        icon={Copy}
+        kind="ghost"
+      ></Button></h2>
+      <h2>{user["account"]["balance"]}</h2>
     </div>
     <Button
       icon={Edit}
       on:click={() => {
-        stock_id = "update";
-      }}>Edit</Button
+        user_id = "update";
+      }}
+      disabled={!hasRight(RightType.UPDATE_USER ,rights)}
+      >Edit</Button
     >
 
-    <Button
-      kind="danger"
-      icon={TrashCan}
-      on:click={handleDelete}>Delete</Button
+    <Button kind="danger" icon={TrashCan} on:click={handleDelete} disabled={!hasRight(RightType.DELETE_USER,rights)}>Delete</Button
     >
   {/if}
 </Content>

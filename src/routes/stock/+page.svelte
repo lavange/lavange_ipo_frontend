@@ -53,6 +53,10 @@
     goto(`/stock/create`);
   };
 
+  const handleUploadClick = () => {
+    goto(`/stock/upload`);
+  };
+
   onMount(async () => {
     await token;
     if (!token_) {
@@ -105,6 +109,7 @@
       headers={[
         { key: "id", value: "Stock Id" },
         { key: "symbol", value: "Symbol" },
+        { key: "name", value: "Company Name" },
         { key: "updatedAt", value: "Modified", display: (date) => new Date(date).toLocaleString() },
       ]}
       rows={stocks}
@@ -123,6 +128,7 @@
               <ToolbarMenuItem hasDivider danger>Stop all</ToolbarMenuItem>
             </ToolbarMenu> -->
           <Button on:click={handleCreateClick}>Create Stock</Button>
+          <Button on:click={handleUploadClick}>Upload</Button>
         </ToolbarContent>
       </Toolbar>
     </DataTable>

@@ -68,3 +68,7 @@ export const successNotification = (title) => {
 export const errorNotification = (title) => {
   notifications.update((items) => [...items, { status: "error", title }]);
 };
+
+export const hasRight = (right, rights) => {
+  return rights.find((right_) => right_ === right) ? true : false;
+}

@@ -24,6 +24,7 @@
     errorNotification,
     formatCurrency,
     formatPercentage,
+    hasRight,
     successNotification,
   } from "../../helper/utils";
   import { AreaChart } from "@carbon/charts-svelte";
@@ -33,6 +34,8 @@
   import { PUBLIC_API_URI } from "$env/static/public";
   import { Repeat } from "carbon-icons-svelte";
   import * as idb from "idb";
+  import { RightType } from "../../helper/constants";
+  import * as jwt from "jsonwebtoken-esm";
 
   let ipos = null;
   let loading = true;
@@ -42,6 +45,7 @@
   let total_amount_invested = 0;
   let total_estimated_return = 0;
   let applied_ipos = [];
+  let rights = [];
 
   token.subscribe((value) => {
     token_ = value;
@@ -191,6 +195,14 @@
     //     return 0;
     //   }
     // });
+
+    let decodedToken = await jwt.decode(token_, {
+      complete: true,
+    });
+
+    rights = await decodedToken.payload.role.rights;
+
+    console.log(hasRight(RightType.UPDATE_IPO,rights));
 
     await initDB();
     applied_ipos = await fetchAppliedIPO();
@@ -371,7 +383,7 @@
             size="small"
             icon={Repeat}
             iconDescription="Sync IPO"
-            disabled={syncStatus}
+            disabled={syncStatus || !hasRight(RightType.UPDATE_IPO,rights)}
             on:click={handleSyncIpo}>IPO</Button
           >
 
@@ -379,7 +391,7 @@
             size="small"
             icon={Repeat}
             iconDescription="Sync IPO"
-            disabled={syncStatus}
+            disabled={syncStatus || !hasRight(RightType.UPDATE_IPO,rights)}
             on:click={async () => {
               await handleSyncIpo(true);
             }}>Force IPO</Button

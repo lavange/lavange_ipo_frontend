@@ -12,7 +12,7 @@
   import { debounce, truncate } from "lodash";
   import { token } from "../helper/token_store";
   import { goto } from "$app/navigation";
-
+  import * as jwt from "jsonwebtoken-esm";
   import * as idb from "idb";
   import { onMount } from "svelte";
   import {
@@ -20,37 +20,50 @@
     formatCurrency,
     formatPercentage,
   } from "../helper/utils";
+  import { RightType } from "../helper/constants";
 
   let applied_ipos = [];
   let token_;
   let stcg = 15;
   let total_amount_invested = 0;
   let total_estimated_return = 0;
+  let rights = [];
 
   const menu_items = [
     {
       id: "ipo",
       title: "IPO",
+      right: RightType.VIEW_IPO
     },
     {
       id: "activity",
       title: "Activity",
+      right: RightType.VIEW_ACTIVITY
     },
     {
       id: "user",
       title: "User",
+      right: RightType.VIEW_USER
     },
     {
       id: "calculator",
       title: "Calculator",
+      right: RightType.VIEW_IPO
     },
-    // {
-    //   id: "order",
-    //   title: "Order",
-    // },
+    {
+      id: "order",
+      title: "Order",
+      right: RightType.VIEW_ORDER
+    },
     {
       id:"stock",
-      title: "Stock"
+      title: "Stock",
+      right: RightType.VIEW_STOCK
+    },
+    {
+      id:"role",
+      title: "Role",
+      right: RightType.VIEW_ROLE
     }
   ];
 
@@ -148,6 +161,15 @@
       return;
     }
 
+    let decodedToken = await jwt.decode(token_, {
+      complete: true,
+    });
+
+    console.log(decodedToken)
+
+    rights = await decodedToken.payload.role.rights;
+
+    console.log(rights);
     await initDB();
     applied_ipos = await fetchAppliedIPO();
   });
@@ -208,9 +230,9 @@
     </Row>
     <hr />
     <Row>
-      {#each menu_items as { id, title }}
+      {#each menu_items as { id, title ,right }}
         <Column sm={12} md={4} lg={4}>
-          <ClickableTile href={`/${id}`}
+          <ClickableTile disabled={!rights.find((right_)=>right_ === right)} href={`/${id}`}
             ><h3 use:truncate>{title}</h3>
             <p>Click Here</p>
           </ClickableTile>
