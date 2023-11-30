@@ -4,13 +4,13 @@
     Content,
     DataTable,
     Loading,
-    Pagination,
     Toolbar,
     ToolbarContent,
     ToolbarSearch,
     ToolbarMenu,
     ToolbarMenuItem,
     Button,
+    Pagination,
   } from "carbon-components-svelte";
   import { onMount, onDestroy } from "svelte";
   import { token } from "../../helper/token_store";
@@ -20,7 +20,7 @@
   import { RightType } from "../../helper/constants";
   import * as jwt from "jsonwebtoken-esm";
 
-  let users = null;
+  let roles = null;
   let loading = true;
   let pageSize = 10;
   let page = 1;
@@ -32,7 +32,7 @@
     token_ = value;
   });
 
-  const fetchUser = async () => {
+  const fetchRole = async () => {
     loading = true;
     var myHeaders = new Headers();
     myHeaders.append("Authorization", `Bearer ${token_}`);
@@ -44,11 +44,23 @@
       mode: "cors",
     };
 
-    const response = await fetch(`${PUBLIC_API_URI}/user`, requestOptions);
+    const response = await fetch(`${PUBLIC_API_URI}/role`, requestOptions);
 
     const data = response.json();
     loading = false;
     return data;
+  };
+
+  const handleRowClick = (row) => {
+    goto(`/role/${row.detail.id}`);
+  };
+
+  const handleCreateClick = () => {
+    goto(`/role/create`);
+  };
+
+  const handleUploadClick = () => {
+    goto(`/role/upload`);
   };
 
   onMount(async () => {
@@ -69,14 +81,14 @@
 
     userRights = await decodedToken.payload.role.rights;
 
-    const data = await fetchUser();
-    users = data["data"]["users"] ?? [];
-    users = users.map((user) => {
+    const data = await fetchRole();
+    roles = data["data"]["roles"] ?? [];
+    roles = roles.map((role) => {
       let new_obj = {};
-      delete Object.assign(new_obj, user, { ["id"]: user["_id"] })["_id"];
+      delete Object.assign(new_obj, role, { ["id"]: role["_id"] })["_id"];
       return new_obj;
     });
-    console.log(users);
+    console.log(roles);
     // ipos.sort((a, b) => {
     //   if (
     //     a.hasOwnProperty("biddingStartDate") &&
@@ -94,57 +106,49 @@
     //   }
     // });
   });
-
-  const handleRowClick = (row) => {
-    goto(`/user/${row.detail.id}`);
-  };
-
-  const handleCreateClick = () => {
-    goto(`/user/create`);
-  };
 </script>
 
 <Content>
-  {#if users === null && loading === false}
+  {#if roles === null && loading === false}
     Nothing to show!
   {:else if loading === true}
     <Loading />
   {:else}
     <DataTable
-      title="User"
-      description="Lavange ipo user list"
+      title="Role"
+      description="Lavange ipo role list"
       sortable
       headers={[
-        { key: "id", value: "User Id" },
-        // {
-        //   key: "timestamp",
-        //   value: "Timestamp",
-        //   display: (date) => new Date(date).toLocaleString(),
-        //   //sort: (a, b) => new Date(b) - new Date(a),
-        // },
-        { key: "username", value: "Username" },
-        { key: "email", value: "Email" },
-        { key: "firstName", value: "First Name" },
-        { key: "lastName", value: "Last Name" },
-        // { key: "description", value: "Description" },
+        { key: "id", value: "Role Id" },
+        { key: "name", value: "Role Name" },
+        {
+          key: "rights",
+          value: "No. of Rights",
+          display: (data) => data.length,
+        },
+        {
+          key: "updatedAt",
+          value: "Modified",
+          display: (date) => new Date(date).toLocaleString(),
+        },
       ]}
-      rows={users}
+      rows={roles}
       on:click:row={handleRowClick}
-      {page}
       {pageSize}
+      {page}
     >
       <Toolbar>
         <ToolbarContent>
           <ToolbarSearch persistent shouldFilterRows />
           <!-- <ToolbarMenu>
-              <ToolbarMenuItem primaryFocus>Restart all</ToolbarMenuItem>
-              <ToolbarMenuItem
-                href="https://cloud.ibm.com/docs/loadbalancer-service"
-              >
-                API documentation
-              </ToolbarMenuItem>
-              <ToolbarMenuItem hasDivider danger>Stop all</ToolbarMenuItem>
-            </ToolbarMenu> -->
+                <ToolbarMenuItem primaryFocus>Restart all</ToolbarMenuItem>
+                <ToolbarMenuItem
+                  href="https://cloud.ibm.com/docs/loadbalancer-service"
+                >
+                  API documentation
+                </ToolbarMenuItem>
+                <ToolbarMenuItem hasDivider danger>Stop all</ToolbarMenuItem>
+              </ToolbarMenu> -->
           <Button
             on:click={handleCreateClick}
             disabled={!hasRight(RightType.UPDATE_ROLE, userRights)}
@@ -156,7 +160,7 @@
     <Pagination
       bind:pageSize
       bind:page
-      totalItems={users.length}
+      totalItems={roles.length}
       pageSizeInputDisabled
     />
   {/if}

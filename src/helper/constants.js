@@ -7,6 +7,9 @@ export const RightType = {
     DELETE_OTHER_USER: 'DELETE_OTHER_USER',        // Delete other user's account
     VIEW_USER: 'VIEW_USER',                        // View own user information
     VIEW_OTHER_USER: 'VIEW_OTHER_USER',            // View other user's information
+    UPDATE_USER_ROLE: "UPDATE_USER_ROLE",
+    UPDATE_OTHER_USER_ROLE: "UPDATE_OTHER_USER_ROLE",
+    UPDATE_OTHER_USER_PASSWORD: "UPDATE_OTHER_USER_PASSWORD",
 
     // Account
     VIEW_ACCOUNT: 'VIEW_ACCOUNT',                  // View own account information

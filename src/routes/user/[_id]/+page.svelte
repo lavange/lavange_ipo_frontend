@@ -14,6 +14,7 @@
     Loading,
     Modal,
     NumberInput,
+    PasswordInput,
     Select,
     SelectItem,
     TextInput,
@@ -51,6 +52,8 @@
   let edit_commission = false;
   let user_id = "";
   let rights = [];
+  let roles = [];
+  let currUser = null;
 
   token.subscribe((value) => {
     token_ = value;
@@ -123,15 +126,42 @@
     return data;
   };
 
+  const fetchRole = async () => {
+    loading = true;
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${token_}`);
+
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+      mode: "cors",
+    };
+
+    const response = await fetch(`${PUBLIC_API_URI}/role`, requestOptions);
+
+    const data = response.json();
+    loading = false;
+    return data;
+  };
+
   const preFillForm = () => {
     user = {
       _id: null,
-      symbol: "",
+      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
     };
 
     default_user = {
       _id: null,
-      symbol: "",
+      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
     };
     loading = false;
   };
@@ -140,7 +170,11 @@
     e.preventDefault();
     console.log("submit", e);
 
-    const response = await updateUser(user);
+    let new_user = {...user};
+    new_user['role'] = new_user['role']['_id']
+
+
+    const response = await updateUser(new_user);
 
     if (response.status === 200) {
       goto(`/user/${response["data"]["user"]["_id"]}`, {
@@ -187,6 +221,24 @@
 
     user_id = $page.params._id;
 
+    const data_ = await fetchRole();
+    roles = data_["data"]["roles"] ?? [];
+    roles = roles.map((role) => {
+      let new_obj = {};
+      delete Object.assign(new_obj, role, { ["id"]: role["_id"] })["_id"];
+      return new_obj;
+    });
+
+    console.log(roles);
+
+    let decodedToken = await jwt.decode(token_, {
+      complete: true,
+    });
+
+    rights = await decodedToken.payload.role.rights;
+
+    currUser = decodedToken.payload;
+
     if (user_id !== "create") {
       const data = await fetchUser();
       user = data["data"]["user"];
@@ -197,13 +249,6 @@
     if (user_id === "create") {
       preFillForm();
     }
-
-    let decodedToken = await jwt.decode(token_, {
-      complete: true,
-    });
-
-
-    rights = await decodedToken.payload.role.rights;
   });
 
   //   $: {
@@ -217,33 +262,68 @@
   {:else if loading === true}
     <Loading />
   {:else if user_id === "create" || user_id === "update"}
-    <!-- <div class="margin--bottom">
+    <div class="margin--bottom">
       <h1>User Form</h1>
       <hr />
     </div>
     <Form on:submit={submitForm}>
       <FormGroup>
         <TextInput
-          id="symbol"
-          placeholder="Enter User Symbol"
-          bind:value={user.symbol}
+          id="username"
+          placeholder="Enter Username"
+          bind:value={user.username}
         />
       </FormGroup>
       <FormGroup>
         <TextInput
-          id="name"
-          placeholder="Enter Company Name"
-          bind:value={user.name}
+          id="email"
+          placeholder="Enter Email"
+          bind:value={user.email}
         />
       </FormGroup>
       <FormGroup>
-        <TextInput id="isin" placeholder="Enter ISIN" bind:value={user.isin} />
+        <TextInput
+          id="firstName"
+          placeholder="Enter First Name"
+          bind:value={user.firstName}
+        />
+      </FormGroup>
+      <FormGroup>
+        <TextInput
+          id="lastName"
+          placeholder="Enter Last Name"
+          bind:value={user.lastName}
+        />
+      </FormGroup>
+      <FormGroup legendText="">
+        <Select
+          id="role"
+          labelText="User Role"
+          selected={user["role"]}
+          on:change={(e) => (user["role"] = e.target.value)}
+          disabled={currUser.userId === user.id
+            ? !hasRight(RightType.UPDATE_USER_ROLE, rights)
+            : !hasRight(RightType.UPDATE_OTHER_USER_ROLE, rights)}
+        >
+          {#each roles as role}
+            <SelectItem value={role.id} text={role.name} />
+          {/each}
+        </Select>
+      </FormGroup>
+      <FormGroup>
+        <PasswordInput
+          id="password"
+          placeholder="Enter New Password"
+          bind:value={user.password}
+          disabled={currUser.userId !== user.id
+            ?  !hasRight(RightType.UPDATE_OTHER_USER_ROLE, rights) : false}
+        />
       </FormGroup>
       <Button type="submit">{user_id === "create" ? "Create" : "Update"}</Button
       >
       {#if user_id === "update"}
         <Button on:click={cancelUpdate}>Cancel</Button>{/if}
-    </Form> -->
+    </Form>
   {:else}
     <h1>
       User {user._id}<Button
@@ -257,13 +337,15 @@
     <hr />
     <div class="margin--bottom">
       <div class="text--label">Username</div>
-      <h2>{user["username"]}<Button
-        on:click={() => navigator.clipboard.writeText(user["username"])}
-        iconDescription={user["username"]}
-        size="small"
-        icon={Copy}
-        kind="ghost"
-      ></Button></h2>
+      <h2>
+        {user["username"]}<Button
+          on:click={() => navigator.clipboard.writeText(user["username"])}
+          iconDescription={user["username"]}
+          size="small"
+          icon={Copy}
+          kind="ghost"
+        ></Button>
+      </h2>
     </div>
     <div class="margin--bottom">
       <div class="text--label">First Name</div>
@@ -275,13 +357,15 @@
     </div>
     <div class="margin--bottom">
       <div class="text--label">Email</div>
-      <h2>{user["email"]}<Button
-        on:click={() => navigator.clipboard.writeText(user["email"])}
-        iconDescription={user["email"]}
-        size="small"
-        icon={Copy}
-        kind="ghost"
-      ></Button></h2>
+      <h2>
+        {user["email"]}<Button
+          on:click={() => navigator.clipboard.writeText(user["email"])}
+          iconDescription={user["email"]}
+          size="small"
+          icon={Copy}
+          kind="ghost"
+        ></Button>
+      </h2>
     </div>
     <div class="margin--bottom">
       <div class="text--label">Role</div>
@@ -297,13 +381,15 @@
     </div>
     <div class="margin--bottom">
       <div class="text--label">Account</div>
-      <h2>{user["account"]["_id"]}<Button
-        on:click={() => navigator.clipboard.writeText(user["account"]["_id"])}
-        iconDescription={user["account"]["_id"]}
-        size="small"
-        icon={Copy}
-        kind="ghost"
-      ></Button></h2>
+      <h2>
+        {user["account"]["_id"]}<Button
+          on:click={() => navigator.clipboard.writeText(user["account"]["_id"])}
+          iconDescription={user["account"]["_id"]}
+          size="small"
+          icon={Copy}
+          kind="ghost"
+        ></Button>
+      </h2>
       <h2>{user["account"]["balance"]}</h2>
     </div>
     <Button
@@ -311,11 +397,14 @@
       on:click={() => {
         user_id = "update";
       }}
-      disabled={!hasRight(RightType.UPDATE_USER ,rights)}
-      >Edit</Button
+      disabled={!hasRight(RightType.UPDATE_USER, rights)}>Edit</Button
     >
 
-    <Button kind="danger" icon={TrashCan} on:click={handleDelete} disabled={!hasRight(RightType.DELETE_USER,rights)}>Delete</Button
+    <Button
+      kind="danger"
+      icon={TrashCan}
+      on:click={handleDelete}
+      disabled={!hasRight(RightType.DELETE_USER, rights)}>Delete</Button
     >
   {/if}
 </Content>
