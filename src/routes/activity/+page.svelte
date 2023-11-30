@@ -1,6 +1,11 @@
 <script>
   //@ts-nocheck
-  import { Content, DataTable, Loading, Pagination } from "carbon-components-svelte";
+  import {
+    Content,
+    DataTable,
+    Loading,
+    Pagination,
+  } from "carbon-components-svelte";
   import { onMount, onDestroy } from "svelte";
   import { token } from "../../helper/token_store";
   import { PUBLIC_API_URI } from "$env/static/public";
@@ -27,7 +32,7 @@
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
-      mode: 'cors'
+      mode: "cors",
     };
 
     const response = await fetch(`${PUBLIC_API_URI}/activity`, requestOptions);
@@ -37,9 +42,9 @@
     return data;
   };
 
-  const handleRowClick = (row)=>{
-    console.log(row)
-  }
+  const handleRowClick = (row) => {
+    console.log(row);
+  };
 
   onMount(async () => {
     await token;
@@ -47,9 +52,9 @@
       goto(`/login`, { replaceState: true });
     }
 
-    const authenticated = await authenticate(token_)
-    console.log(authenticated)
-    if(!authenticated){
+    const authenticated = await authenticate(token_);
+    console.log(authenticated);
+    if (!authenticated) {
       goto(`/logout`, { replaceState: true });
     }
 
@@ -89,11 +94,15 @@
     <Loading />
   {:else}
     <DataTable
-    title="Activity"
-  description="Lavange ipo activity list"
+      title="Activity"
+      description="Lavange ipo activity list"
       sortable
       headers={[
-        { key: "activityType", value: "Activity Type" , display: (activityType) => activityType.toUpperCase()},
+        {
+          key: "activityType",
+          value: "Activity Type",
+          display: (activityType) => activityType.toUpperCase(),
+        },
         {
           key: "timestamp",
           value: "Timestamp",
@@ -106,13 +115,13 @@
       rows={activities}
       {pageSize}
       on:click:row={handleRowClick}
-  {page}
+      {page}
     />
     <Pagination
-  bind:pageSize
-  bind:page
-  totalItems={activities.length}
-  pageSizeInputDisabled
-/>
+      bind:pageSize
+      bind:page
+      totalItems={activities.length}
+      pageSizeInputDisabled
+    />
   {/if}
 </Content>
