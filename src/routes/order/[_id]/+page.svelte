@@ -21,8 +21,10 @@
   import { onMount } from "svelte";
   import {
     authenticate,
+    errorNotification,
     formatCurrency,
     formatDate,
+    successNotification,
   } from "../../../helper/utils";
   import { AreaChart } from "@carbon/charts-svelte";
   import "@carbon/charts-svelte/styles.css";
@@ -151,6 +153,11 @@
     const response = await fetch(`${PUBLIC_API_URI}/order`, requestOptions);
     const data = await response.json();
     loading = false;
+    if (data && data.hasOwnProperty("status") && data["status"] === 200) {
+      successNotification("Order Updated!");
+    } else {
+      errorNotification("Order Update Failed!");
+    }
     return data;
   };
 
@@ -197,6 +204,17 @@
       return;
     }
 
+    const data = await fetchUser();
+    users = data["data"]["users"] ?? [];
+    users = users.map((user) => {
+      let new_obj = {};
+      delete Object.assign(new_obj, user, { ["id"]: user["_id"] })["_id"];
+      return new_obj;
+    });
+
+    const data_ = await fetchStock();
+    stocks = data_["data"]["stocks"] ?? [];
+
     if ($page.params._id !== "create") {
       const data = await fetchOrder();
       let processed_data = data["data"]["order"];
@@ -208,18 +226,9 @@
 
     if ($page.params._id === "create") {
       preFillForm();
+      order["symbol"] = stocks[0]?.symbol;
+      order["user"] = users[0]?.id;
     }
-
-    const data = await fetchUser();
-    users = data["data"]["users"] ?? [];
-    users = users.map((user) => {
-      let new_obj = {};
-      delete Object.assign(new_obj, user, { ["id"]: user["_id"] })["_id"];
-      return new_obj;
-    });
-
-    const data_ = await fetchStock();
-    stocks = data_["data"]["stocks"] ?? [];
   });
 
   const formatData = (data) => {
@@ -244,7 +253,7 @@
         <Select
           id="symbol"
           labelText="Symbol"
-          selected={order["symbol"] ? stocks[0] : "" }
+          selected={order["symbol"]}
           on:change={(e) => (order["symbol"] = e.target.value)}
         >
           {#each stocks as { symbol }}
@@ -289,7 +298,7 @@
         <Select
           id="tradeType"
           labelText="Trade Type"
-          selected={order["tradeType"] }
+          selected={order["tradeType"]}
           on:change={(e) => (order["tradeType"] = e.target.value)}
         >
           {#each Object.keys(TradeType) as tradeType}
@@ -331,7 +340,7 @@
         <Select
           id="user"
           labelText="User"
-          selected={order["user"] ? users[0].id : ""}
+          selected={order["user"]}
           on:change={(e) => (order["user"] = e.target.value)}
         >
           {#each users as { username, id }}
@@ -375,7 +384,11 @@
           >
         {:else}
           <div class="margin--bottom">
-            <NumberInput label="Commission" step={0.01}  bind:value={order.commission} />
+            <NumberInput
+              label="Commission"
+              step={0.01}
+              bind:value={order.commission}
+            />
           </div>
           <Button
             size="small"

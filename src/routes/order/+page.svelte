@@ -10,6 +10,7 @@
     ToolbarMenu,
     ToolbarMenuItem,
     Button,
+    Pagination,
   } from "carbon-components-svelte";
   import { onMount, onDestroy } from "svelte";
   import { token } from "../../helper/token_store";
@@ -19,6 +20,8 @@
 
   let orders = null;
   let loading = true;
+  let pageSize = 10;
+  let page = 1;
 
   let token_;
 
@@ -49,9 +52,9 @@
     goto(`/order/${row.detail.id}`);
   };
 
-  const handleCreateClick = ()=>{
+  const handleCreateClick = () => {
     goto(`/order/create`);
-  }
+  };
 
   onMount(async () => {
     await token;
@@ -126,10 +129,12 @@
       ]}
       rows={orders}
       on:click:row={handleRowClick}
+      {page}
+      {pageSize}
     >
       <Toolbar>
         <ToolbarContent>
-          <ToolbarSearch />
+          <ToolbarSearch persistent shouldFilterRows />
           <!-- <ToolbarMenu>
             <ToolbarMenuItem primaryFocus>Restart all</ToolbarMenuItem>
             <ToolbarMenuItem
@@ -143,5 +148,11 @@
         </ToolbarContent>
       </Toolbar>
     </DataTable>
+    <Pagination
+      bind:pageSize
+      bind:page
+      totalItems={orders.length}
+      pageSizeInputDisabled
+    />
   {/if}
 </Content>
