@@ -157,12 +157,12 @@
   const preFillForm = () => {
     order = {
       _id: null,
-      orderStatus: "",
-      orderType: "",
+      orderStatus: OrderStatus.FILLED,
+      orderType: OrderType.MARKET,
       price: 0,
       quantity: 0,
       symbol: "",
-      tradeType: "",
+      tradeType: TradeType.BUY,
       user: "",
       commission: 0,
     };
@@ -244,7 +244,7 @@
         <Select
           id="symbol"
           labelText="Symbol"
-          selected={order["symbol"]}
+          selected={order["symbol"] ? stocks[0] : "" }
           on:change={(e) => (order["symbol"] = e.target.value)}
         >
           {#each stocks as { symbol }}
@@ -289,7 +289,7 @@
         <Select
           id="tradeType"
           labelText="Trade Type"
-          selected={order["tradeType"]}
+          selected={order["tradeType"] }
           on:change={(e) => (order["tradeType"] = e.target.value)}
         >
           {#each Object.keys(TradeType) as tradeType}
@@ -331,7 +331,7 @@
         <Select
           id="user"
           labelText="User"
-          selected={order["user"]}
+          selected={order["user"] ? users[0].id : ""}
           on:change={(e) => (order["user"] = e.target.value)}
         >
           {#each users as { username, id }}
