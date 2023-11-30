@@ -56,6 +56,10 @@
     goto(`/order/create`);
   };
 
+  const handleCalculatorClick = () => {
+    goto(`/order/calculator`);
+  };
+
   onMount(async () => {
     await token;
     if (!token_) {
@@ -145,6 +149,7 @@
             <ToolbarMenuItem hasDivider danger>Stop all</ToolbarMenuItem>
           </ToolbarMenu> -->
           <Button on:click={handleCreateClick}>Create Order</Button>
+          <Button on:click={handleCalculatorClick}>Calculate Order</Button>
         </ToolbarContent>
       </Toolbar>
     </DataTable>
