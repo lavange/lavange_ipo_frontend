@@ -322,7 +322,7 @@
         </Select>
       </FormGroup>
       <FormGroup>
-        <NumberInput label="Price" bind:value={order.price} />
+        <NumberInput label="Price" step={0.01} bind:value={order.price} />
       </FormGroup>
       <FormGroup>
         <NumberInput label="Quantity" bind:value={order.quantity} />
@@ -375,7 +375,7 @@
           >
         {:else}
           <div class="margin--bottom">
-            <NumberInput label="Commission" bind:value={order.commission} />
+            <NumberInput label="Commission" step={0.01}  bind:value={order.commission} />
           </div>
           <Button
             size="small"
