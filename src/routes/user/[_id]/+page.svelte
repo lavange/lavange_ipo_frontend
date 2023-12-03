@@ -170,13 +170,16 @@
     e.preventDefault();
     console.log("submit", e);
 
-    let new_user = {...user};
-    new_user['role'] = new_user['role']['_id']
+    let new_user = { ...user };
+    //new_user['role'] = new_user['role']['_id']
 
 
     const response = await updateUser(new_user);
 
     if (response.status === 200) {
+      const data = await fetchUser();
+      user = data["data"]["user"];
+      default_user = data["data"]["user"];
       goto(`/user/${response["data"]["user"]["_id"]}`, {
         replaceState: true,
       });
@@ -316,7 +319,8 @@
           placeholder="Enter New Password"
           bind:value={user.password}
           disabled={currUser.userId !== user.id
-            ?  !hasRight(RightType.UPDATE_OTHER_USER_ROLE, rights) : false}
+            ? !hasRight(RightType.UPDATE_OTHER_USER_ROLE, rights)
+            : false}
         />
       </FormGroup>
       <Button type="submit">{user_id === "create" ? "Create" : "Update"}</Button

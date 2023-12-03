@@ -5,6 +5,8 @@
     Button,
     Checkbox,
     Content,
+    DatePicker,
+    DatePickerInput,
     Dropdown,
     Form,
     FormGroup,
@@ -329,6 +331,13 @@
             <SelectItem value={orderStatus} text={orderStatus} />
           {/each}
         </Select>
+      </FormGroup>
+      <FormGroup>
+        <DatePicker datePickerType="single" bind:value={order['date']}  on:change={(e)=>{
+          //order['date'] = e.target.value
+        }}>
+          <DatePickerInput labelText="Date" placeholder="mm/dd/yyyy" />
+        </DatePicker>
       </FormGroup>
       <FormGroup>
         <NumberInput label="Price" step={0.01} bind:value={order.price} />

@@ -126,6 +126,8 @@
         { key: "email", value: "Email" },
         { key: "firstName", value: "First Name" },
         { key: "lastName", value: "Last Name" },
+        { key: "role.name", value: "Role" },
+        { key: "updatedAt", value: "Last Modified" },
         // { key: "description", value: "Description" },
       ]}
       rows={users}

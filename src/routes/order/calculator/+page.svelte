@@ -277,6 +277,7 @@
               { key: "quantity", value: "Quantity" },
               { key: "price", value: "Price" },
               { key: "orderStatus", value: "Order Status" },
+              { key: "date", value: "Date" },
               // {
               //   key: "timestamp",
               //   value: "Timestamp",
