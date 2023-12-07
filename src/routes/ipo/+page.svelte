@@ -36,6 +36,7 @@
   import * as idb from "idb";
   import { RightType } from "../../helper/constants";
   import * as jwt from "jsonwebtoken-esm";
+  import { page } from "$app/stores";
 
   let ipos = null;
   let loading = true;
@@ -202,7 +203,7 @@
 
     rights = await decodedToken.payload.role.rights;
 
-    console.log(hasRight(RightType.UPDATE_IPO,rights));
+    console.log(hasRight(RightType.UPDATE_IPO, rights));
 
     await initDB();
     applied_ipos = await fetchAppliedIPO();
@@ -225,25 +226,42 @@
   const filter = (val, query, selectedTab) => {
     let filtered_data = val ?? [];
 
-    filtered_data = filtered_data.filter((ipo) => {
-      if (selectedTab === 0) {
-        if (
-          ipo.hasOwnProperty("biddingStartDate") &&
-          new Date(ipo.biddingStartDate) <= new Date()
-        ) {
-          return true;
+    filtered_data = filtered_data
+      .filter((ipo) => {
+        if (selectedTab === 0) {
+          if (
+            ipo.hasOwnProperty("biddingStartDate") &&
+            new Date(ipo.biddingStartDate) <= new Date()
+          ) {
+            return true;
+          }
+        } else if (selectedTab === 1) {
+          if (
+            (ipo.hasOwnProperty("biddingStartDate") &&
+              new Date(ipo.biddingStartDate) > new Date()) ||
+            !ipo.hasOwnProperty("biddingStartDate")
+          ) {
+            return true;
+          }
         }
-      } else if (selectedTab === 1) {
+        return false;
+      })
+      .sort((a, b) => {
         if (
-          (ipo.hasOwnProperty("biddingStartDate") &&
-            new Date(ipo.biddingStartDate) > new Date()) ||
-          !ipo.hasOwnProperty("biddingStartDate")
+          a.hasOwnProperty("biddingStartDate") &&
+          b.hasOwnProperty("biddingStartDate")
         ) {
-          return true;
+          let keyA = new Date(a.biddingStartDate);
+          let keyB = new Date(b.biddingStartDate);
+          return keyB - keyA;
+        } else if (a.hasOwnProperty("biddingStartDate")) {
+          return -1;
+        } else if (b.hasOwnProperty("biddingStartDate")) {
+          return 1;
+        } else {
+          return 0;
         }
-      }
-      return false;
-    });
+      });
 
     if (query !== "") {
       filtered_data = filtered_data.filter((ipo) =>
@@ -258,6 +276,13 @@
   // Use the debounced filter function in the UI.
   let filteredIpos = [];
   let selected = 0;
+
+  $: {
+    if ($page.url.searchParams.get("type") === "upcoming") {
+      selected = 1;
+    }
+  }
+
   $: {
     filteredIpos = filter(ipos, search_query, selected);
   }
@@ -383,7 +408,7 @@
             size="small"
             icon={Repeat}
             iconDescription="Sync IPO"
-            disabled={syncStatus || !hasRight(RightType.UPDATE_IPO,rights)}
+            disabled={syncStatus || !hasRight(RightType.UPDATE_IPO, rights)}
             on:click={handleSyncIpo}>IPO</Button
           >
 
@@ -391,7 +416,7 @@
             size="small"
             icon={Repeat}
             iconDescription="Sync IPO"
-            disabled={syncStatus || !hasRight(RightType.UPDATE_IPO,rights)}
+            disabled={syncStatus || !hasRight(RightType.UPDATE_IPO, rights)}
             on:click={async () => {
               await handleSyncIpo(true);
             }}>Force IPO</Button
@@ -401,8 +426,18 @@
       <div class="margin--bottom" />
       <Row>
         <Tabs type="container" bind:selected autoWidth>
-          <Tab label="Ongoing" />
-          <Tab label="Upcoming" />
+          <Tab
+            label="Ongoing"
+            on:click={() => {
+              goto("/ipo?type=ongoing");
+            }}
+          />
+          <Tab
+            label="Upcoming"
+            on:click={() => {
+              goto("/ipo?type=upcoming");
+            }}
+          />
           <svelte:fragment slot="content">
             <TabContent>
               <Row>

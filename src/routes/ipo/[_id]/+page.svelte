@@ -244,7 +244,7 @@
         <h2>{formatDate(ipo["biddingStartDate"])}</h2>
 
         <div class="text--label">Bidding End Date</div>
-        <h2>{formatDate(ipo["biddingStartDate"])}</h2>
+        <h2>{formatDate(ipo["biddingEndDate"])}</h2>
       </div>
     {/if}
 
